@@ -1,0 +1,174 @@
+@charset "utf-8";
+
+.icon-person {
+  position: relative;
+  top: 0px;
+  left: 20px;
+  transform: scale(1.5);
+  color: #777;
+  margin-right: 40px;
+  border: solid 2px #777;
+  border-radius: 50%;
+}
+.icon-settings {
+  margin-left: auto;
+  color: #777;
+  margin-right: 20px;
+}
+.user {
+  font-weight: bold;
+}
+
+.column_box {
+  margin-top: 5px;
+  margin-left: 0;
+  display: flex;
+  padding: 10px 0;
+  align-items: center;
+}
+
+.icon-column {
+  margin-right: 20px;
+  margin-left: 20px;
+  left: 0px;
+  position: relative;
+  transform: scale(1.4);
+}
+
+.main-column-today i {
+  color: #66cdaa;
+}
+.main-column-tomorrow i {
+  color: #ffa500;
+}
+.main-column-later i {
+  color: #1e90ff;
+}
+.main-column-completed i {
+  color: #777;
+}
+
+.counts {
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+.main-column-projects {
+  height: 210px;
+  overflow-y: scroll;
+}
+.main-column-projects-project {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.main-column-projects-project i {
+  margin: 0px 5px;
+}
+.main-column-projects-project p {
+  width: 170px;
+}
+.main-column-add_project {
+  display: flex;
+  align-items: center;
+}
+.main-column-add_project input {
+  border: none;
+  width: 200px;
+  height: 24px;
+}
+.main-column-add_project i {
+  padding: 0 5px;
+}
+
+#todo_title {
+  margin: 20px 25px;
+}
+.main-todo {
+  border-left: solid 3px #fff;
+}
+
+.main-todo-result {
+  margin-left: 30px;
+  width: 500px;
+  height: 50px;
+  background-color: #fff;
+  display: flex;
+}
+.main-todo-result-incomplete,
+.main-todo-result-complete {
+  text-align: center;
+  margin-left: 130px;
+}
+.main-todo-result-incomplete h3,
+.main-todo-result-complete h3 {
+  color: orangered;
+}
+.main-todo-body {
+  overflow-y: scroll;
+  max-height: 320px;
+}
+.main-todo-body-tasks-task {
+  margin-top: 10px;
+  margin-left: 30px;
+  width: 500px;
+  height: 40px;
+  background-color: #fff;
+  align-items: center;
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.main-todo-body-tasks-task i {
+  margin: 0px 10px;
+}
+.main-todo-body-tasks-task-text {
+  height: 30px;
+  width: 300px;
+  border: none;
+}
+.main-todo-body-tasks-task-date {
+  color: #777;
+  height: 26px;
+  width: 140px;
+  margin: 0 10px;
+  border: none;
+}
+
+.main-todo-body-complete_task_button {
+  margin: 10px auto;
+  width: 200px;
+  background-color: #fff;
+  text-align: center;
+}
+.main-todo-body-complete_tasks,
+.main-todo-body-incomplete_tasks {
+  display: flex;
+  align-items: center;
+  width: 500px;
+  background-color: #fff;
+  margin-left: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+}
+.main-todo-body-complete_tasks p,
+.main-todo-body-incomplete_tasks p {
+  margin-left: 10px;
+}
+.delete_incomplete_task,
+.delete_complete_task {
+  margin-left: auto;
+  margin-right: 10px;
+}
+.check_incomplete_task,
+.check_complete_task {
+  margin: 5px 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.red {
+  color: red;
+}
