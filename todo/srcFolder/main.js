@@ -1,4 +1,5 @@
 
+
 window.onload = function(){
     //完了済みタスクの開閉
     document.getElementById("complete_task_button").addEventListener("click", openComplete);
@@ -7,9 +8,23 @@ window.onload = function(){
     document.getElementById("today_task").addEventListener("click", clickToday);
     document.getElementById("tomorrow_task").addEventListener("click", clickTomorrow);
     document.getElementById("later_task").addEventListener("click", clickLater);
+    document.getElementById("conpleted_task").addEventListener("click", clickCompleted);
+
+    //プロジェクト選択機能初期化
+    let projectElements = $(".main-column-projects-project");
+    let projectCount = projectElements.length;
+    projectElements.each(function(i, elem){
+        $(elem).on("click",function(){
+            $(".selected_column").removeClass("selected_column");
+            $(elem).addClass("selected_column");
+        })
+    })
 
     //プロジェクトの削除ボタン初期設定
     initProjectDeleteButton();
+
+    //日付入力欄に初期値（今日）を入力
+    initTaskDate();
     
     //Enterキー入力時の機能
     document.body.addEventListener("keydown", event =>{
@@ -23,8 +38,8 @@ window.onload = function(){
                     inputProject(text);
                 }
             //タスク入力欄選択中にEnter
-            }else if(current.id === "input_task"){
-                let text = current.value;
+            }else if(current.id === "input_task" || current.id === "input_date"){
+                let text = $("#input_task").val();
                 if(text !== ""){
                     inputTask(text);
                 }
@@ -61,9 +76,15 @@ function inputProject(text){
         //追加プロジェクトの削除ボタン有効化
         let newProject = $(".main-column-projects div:last");
         enableProjectDeleteButton(newProject);
+        //追加プロジェクトの選択を有効化
+        newProject.on("click", function(){
+            $(".selected_column").removeClass("selected_column");
+            newProject.addClass("selected_column");
+        });
+        
 
     }).fail(function(XMLHttpRequest, status, e){
-        alert(e);
+        Swal.fire("日付を入力してください");
     });
 }
 
@@ -90,6 +111,7 @@ function enableProjectDeleteButton(element){
 //プロジェクトの削除
 function deleteProject(id){
     //確認ダイアログ
+
     if(window.confirm("プロジェクトを削除してもよろしいですか？")){
 
         $.ajax("./post.php",
@@ -112,23 +134,52 @@ function deleteProject(id){
 
 //タスク入力欄選択中にEnter
 function inputTask(text){
-    alert("task:" + text);
+    if($("#input_date").val() == false){
+        alert("日付を入力してください");
+    }else{
+
+    }
+}
+
+//日付入力欄に初期値（今日）を設定
+function initTaskDate(){
+    let todayDate = new Date();
+    let year = todayDate.getFullYear();
+    let month = todayDate.getMonth() + 1;
+    if(month < 10){
+        month = "0" + month;
+    }
+    let day = todayDate.getDate();
+    if(day < 10){
+        day = "0" + day;
+    }
+
+    let todayInit = year + "-" + month + "-" + day;
+    $("#input_date").val(todayInit);
 }
 
 //今日ボタン
 function clickToday(){
-    alert("today");
+    $(".selected_column").removeClass("selected_column");
+    $("#today_task").addClass("selected_column");
 }
 
 //明日ボタン
 function clickTomorrow(){
-    alert("tomorrow");
+    $(".selected_column").removeClass("selected_column");
+    $("#tomorrow_task").addClass("selected_column");
 }
 //それ以降ボタン
 function clickLater(){
-    alert("later");
+    $(".selected_column").removeClass("selected_column");
+    $("#later_task").addClass("selected_column");
 }
 
+//完了済みボタン
+function clickCompleted(){
+    $(".selected_column").removeClass("selected_column");
+    $("#conpleted_task").addClass("selected_column");
+}
 
 
 //完了済みタスクの表示非表示 

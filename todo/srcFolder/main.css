@@ -27,6 +27,10 @@
   align-items: center;
 }
 
+.selected_column {
+  background-color: #a8ffc0;
+}
+
 .icon-column {
   margin-right: 20px;
   margin-left: 20px;
@@ -107,6 +111,10 @@
 .main-todo-body {
   overflow-y: scroll;
   max-height: 320px;
+}
+.task_value_incomplete,
+.task_value_complete {
+  width: 280px;
 }
 .main-todo-body-tasks-task {
   margin-top: 10px;

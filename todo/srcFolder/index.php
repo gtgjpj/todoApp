@@ -36,7 +36,7 @@
         </div>
         <div class="main">
             <div class="main-column">
-                <div id="today_task" class="main-column-today column_box">
+                <div id="today_task" class="main-column-today column_box selected_column">
                     <i class="material-icons icon-column">wb_sunny</i>
                     <p>今日</p>
                     <p class="counts">0</p>
@@ -51,7 +51,7 @@
                     <p>それ以降</p>
                     <p class="counts">0</p>
                 </div>
-                <div class="main-column-completed column_box">
+                <div id=conpleted_task class="main-column-completed column_box">
                     <i class="material-icons icon-column">check_circle_outline</i>
                     <p>完了済み</p>
                     <p class="counts">0</p>
@@ -95,12 +95,13 @@
                         <div class="main-todo-body-tasks-task">
                             <i class="material-icons">add</i>
                             <input id="input_task" class="main-todo-body-tasks-task-text" type="text" maxlength="30" placeholder="ここにタスクを入力してEnter">
-                            <input class="main-todo-body-tasks-task-date" type="date">
+                            <input id="input_date" class="main-todo-body-tasks-task-date" type="date">
                         </div>
                     </div>
                     <div class="main-todo-body-incomplete_tasks">
                         <i class="material-icons check-incomplete_task">crop_square</i>
-                        <p>TEST0</p>
+                        <p class="task_value_incomplete">TEST0</p>
+                        <p class="task_date_incomplete">期限:</p>
                         <i class="material-icons delete_incomplete_task">delete_forever</i>
                     </div>
                     <div id="complete_task_button" class="main-todo-body-complete_task_button">
@@ -108,13 +109,15 @@
                     </div>
                     <div class="main-todo-body-complete_tasks hidden">
                         <i class="material-icons check-complete_task">done</i>
-                        <p>TEST</p>
+                        <p class="task_value_complete">TEST1</p>
+                        <p class="task_date_complete">期限:</p>
                         <i class="material-icons delete_complete_task">delete_forever</i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../jquery-3.5.1.min.js"></script>
     <script src="./main.js"></script>
 </body>

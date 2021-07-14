@@ -11,6 +11,9 @@ switch ($_POST['todo']) {
     case "deleteProject":
         deleteProject();
         break;
+    case "insertTask":
+        insertTask();
+        break;
 }
 
 //プロジェクトの追加を行い、追加したプロジェクトを返す
@@ -41,6 +44,22 @@ function deleteProject()
     $data = $_POST['project_id'];
     //データの削除
     SQL::deleteProject($data);
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
+//タスクの追加を行い、画面表示を行うためのタスクの配列を返す
+function insertTask()
+{
+    $data[] = $_POST['project_id'];
+    $data[] = $_POST['task_value'];
+    $data[] = $_POST['completetion_date'];
+    $data[] = $_POST['input_date'];
+    //タスクの追加
+    SQL::insertTaskToProject($data[0], $data[1], $data[2], $data[3]);
+    //タスク追加後のプロジェクト内のタスク取得
+
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;
