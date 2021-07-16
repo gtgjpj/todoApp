@@ -17,7 +17,7 @@
     <?php
 
     include("../DB.php");
-    include_once("./SQL.php");
+    include("./SQL.php");
 
     $pdo = new PDO(DB::dsn, DB::username, DB::password);
     //$pdo = new PDO(dsn, username, password);
@@ -63,7 +63,7 @@
                     foreach ($stmt as $row) {
                     ?><div class="main-column-projects-project" data-project_id="<?php echo $row[0]; ?>">
                             <i class="material-icons">label</i>
-                            <p><?php echo $row[1]; ?></p>
+                            <p><?php echo DB::h($row[1]); ?></p>
                             <i class="material-icons delete_project_button">delete_forever</i>
                         </div><?php
                             }
@@ -98,20 +98,16 @@
                             <input id="input_date" class="main-todo-body-tasks-task-date" type="date">
                         </div>
                     </div>
-                    <div class="main-todo-body-incomplete_tasks">
-                        <i class="material-icons check-incomplete_task">crop_square</i>
-                        <p class="task_value_incomplete">TEST0</p>
-                        <p class="task_date_incomplete">期限:</p>
-                        <i class="material-icons delete_incomplete_task">delete_forever</i>
+                    <div id="incomplete_tasks">
+
+
                     </div>
                     <div id="complete_task_button" class="main-todo-body-complete_task_button">
                         <p>完了済みのタスクを表示</p>
                     </div>
-                    <div class="main-todo-body-complete_tasks hidden">
-                        <i class="material-icons check-complete_task">done</i>
-                        <p class="task_value_complete">TEST1</p>
-                        <p class="task_date_complete">期限:</p>
-                        <i class="material-icons delete_complete_task">delete_forever</i>
+                    <div id="complete_tasks">
+
+
                     </div>
                 </div>
             </div>

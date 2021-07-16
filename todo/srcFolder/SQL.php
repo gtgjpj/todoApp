@@ -82,6 +82,6 @@ class SQL
         }
 
         $pdo = null;
-        return $stmt;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

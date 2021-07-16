@@ -8,6 +8,6 @@ class DB
 
     public static function h($mes)
     {
-        return htmlspecialchars($mes, ENT_NOQUOTES, "UTF-8");
+        return htmlspecialchars($mes, ENT_QUOTES, "UTF-8");
     }
 }

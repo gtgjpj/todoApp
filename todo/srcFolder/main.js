@@ -17,6 +17,8 @@ window.onload = function(){
         $(elem).on("click",function(){
             $(".selected_column").removeClass("selected_column");
             $(elem).addClass("selected_column");
+            let select_project_id = $(elem).data("project_id");
+            displayTaskOfSelectProject(select_project_id);
         })
     })
 
@@ -48,7 +50,59 @@ window.onload = function(){
     });
 }
 
+//選んだプロジェクトのタスクを表示
+//TODO e->status
+function displayTaskOfSelectProject(project_id){
+    $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                value: project_id,
+                todo: "selectProjectTask"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        //返ってきたタスク配列を処理する
+        for(let i=0; i<data.length; i++){
+            //1の場合、未完了のタスク
+            if(data[i]["task_status"] == 1){
+                let newDiv = $("<div class='main-todo-body-incomplete_tasks'></div>");
+                let newI1 = $("<i class='material-icons check-incomplete_task'>crop_square</i>");
+                let newP1 = $(`<p class='task_value_incomplete'>${data[i]["task_value"]}</p>`);
+                let newP2 = $(`<p class='task_date_incomplete'>期限:${data[i]["completetion_date"]}</p>`);
+                let newI2 = $("<i class='material-icons delete_incomplete_task'>delete_forever</i>")                
+
+                newDiv.append(newI1);
+                newDiv.append(newP1);
+                newDiv.append(newP2);
+                newDiv.append(newI2);
+    
+                $("#incomplete_tasks").append(newDiv);
+            //1以外の場合（0の場合）完了済みのタスク
+            }else{
+                let newDiv = $("<div class='main-todo-body-complete_tasks hidden'></div>");
+                let newI1 = $("<i class='material-icons check-complete_task'>done</i>");
+                let newP1 = $(`<p class='task_value_complete'>${data[i]["task_value"]}</p>`);
+                let newP2 = $(`<p class='task_date_complete'>期限:${data[i]["completetion_date"]}</p>`);
+                let newI2 = $("<i class='material-icons delete_complete_task'>delete_forever</i>")                
+
+                newDiv.append(newI1);
+                newDiv.append(newP1);
+                newDiv.append(newP2);
+                newDiv.append(newI2);
+    
+                $("#complete_tasks").append(newDiv);
+            }
+        }
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("タスクを表示できません\n" + e);
+    });
+}
+
 //プロジェクト入力欄選択中に、Enterを押した際
+//TODO e->status
 function inputProject(text){
     $.ajax("./post.php",  
         {
@@ -84,7 +138,7 @@ function inputProject(text){
         
 
     }).fail(function(XMLHttpRequest, status, e){
-        Swal.fire("日付を入力してください");
+        alert("入力に失敗しました\n" + e);
     });
 }
 
@@ -109,6 +163,7 @@ function enableProjectDeleteButton(element){
 }
 
 //プロジェクトの削除
+//TODO e->status
 function deleteProject(id){
     //確認ダイアログ
 
@@ -127,7 +182,7 @@ function deleteProject(id){
             let deleteElement = $(`[data-project_id=${data}]`);
             deleteElement.remove();
         }).fail(function(XMLHttpRequest, status, e){
-            alert(e);
+            alert("削除できませんでした" + e);
         });
     }
 }
