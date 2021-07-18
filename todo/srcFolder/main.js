@@ -1,4 +1,5 @@
-
+//完了済みタスクの表示フラグ(0:非表示)
+let openCompleteFlag = 0;
 
 window.onload = function(){
     //完了済みタスクの開閉
@@ -8,7 +9,7 @@ window.onload = function(){
     document.getElementById("today_task").addEventListener("click", clickToday);
     document.getElementById("tomorrow_task").addEventListener("click", clickTomorrow);
     document.getElementById("later_task").addEventListener("click", clickLater);
-    document.getElementById("conpleted_task").addEventListener("click", clickCompleted);
+    document.getElementById("completed_task").addEventListener("click", clickCompleted);
 
     //プロジェクト選択機能初期化
     let projectElements = $(".main-column-projects-project");
@@ -21,6 +22,10 @@ window.onload = function(){
             displayTaskOfSelectProject(select_project_id);
         })
     })
+
+    //タスクの削除ボタン有効化
+    //TODO 5初期選択リスト内のタスク削除ボタン有効化
+    //initTaskDeleteButton();
 
     //プロジェクトの削除ボタン初期設定
     initProjectDeleteButton();
@@ -50,10 +55,40 @@ window.onload = function(){
     });
 }
 
-//選んだプロジェクトのタスクを表示
-//TODO e->status
+//タスク削除ボタン有効化
+//TODO 0タスク削除機能実装(日付選択対応)
+function enableTaskDeleteButton(task_id_data){
+    let project_id = $(".selected_column").data("project_id");
+    task_id = task_id_data.data.value;
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                project_id: project_id,
+                task_id: task_id,
+                todo: "deleteTask"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        //返ってきたタスク処理する
+        displayProjectTasks(data);
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("タスクを削除できません\n" + e);
+    });
+}
+
+//選択したプロジェクトのタスクを表示
 function displayTaskOfSelectProject(project_id){
-    $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+
+    //タスクを追加するフォームを表示する
+    if($(".main-todo-body-tasks-task").hasClass("hidden")){
+        $(".main-todo-body-tasks-task").removeClass("hidden");
+    }
+    //タスク画面で、選択中のプロジェクトタイトルを変更
+    let selectedProjectName = $(".selected_column p").text();
+    $("#todo_title").text(selectedProjectName);
+    //タスク一覧を表示
     $.ajax("./post.php",
         {
             type: "POST",
@@ -64,45 +99,101 @@ function displayTaskOfSelectProject(project_id){
             dataType: "json"
         }
     ).done(function(data){
-        //返ってきたタスク配列を処理する
-        for(let i=0; i<data.length; i++){
-            //1の場合、未完了のタスク
-            if(data[i]["task_status"] == 1){
-                let newDiv = $("<div class='main-todo-body-incomplete_tasks'></div>");
-                let newI1 = $("<i class='material-icons check-incomplete_task'>crop_square</i>");
-                let newP1 = $(`<p class='task_value_incomplete'>${data[i]["task_value"]}</p>`);
-                let newP2 = $(`<p class='task_date_incomplete'>期限:${data[i]["completetion_date"]}</p>`);
-                let newI2 = $("<i class='material-icons delete_incomplete_task'>delete_forever</i>")                
-
-                newDiv.append(newI1);
-                newDiv.append(newP1);
-                newDiv.append(newP2);
-                newDiv.append(newI2);
-    
-                $("#incomplete_tasks").append(newDiv);
-            //1以外の場合（0の場合）完了済みのタスク
-            }else{
-                let newDiv = $("<div class='main-todo-body-complete_tasks hidden'></div>");
-                let newI1 = $("<i class='material-icons check-complete_task'>done</i>");
-                let newP1 = $(`<p class='task_value_complete'>${data[i]["task_value"]}</p>`);
-                let newP2 = $(`<p class='task_date_complete'>期限:${data[i]["completetion_date"]}</p>`);
-                let newI2 = $("<i class='material-icons delete_complete_task'>delete_forever</i>")                
-
-                newDiv.append(newI1);
-                newDiv.append(newP1);
-                newDiv.append(newP2);
-                newDiv.append(newI2);
-    
-                $("#complete_tasks").append(newDiv);
-            }
-        }
+        //返ってきたタスク処理する
+        displayProjectTasks(data);
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを表示できません\n" + e);
     });
 }
 
+//
+// function displayProjectTasks(data, project_id){
+
+// }
+
+//プロジェクトのタスク一覧を取得して表示する
+function displayProjectTasks(data){
+    //変更前のタスク一覧を削除する
+    $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+    for(let i=0; i<data.length; i++){
+        //新しいタスクのid
+        let task_id = data[i]["task_id"];
+        //新しいタスクのstatus
+        let task_status = data[i]["task_status"];
+        //1の場合、未完了のタスク
+        if(data[i]["task_status"] == 1){
+            let newDiv = $(`<div class='main-todo-body-incomplete_tasks' data-task_id=${data[i]["task_id"]}></div>`);
+            let newI1 = $("<i class='material-icons check-incomplete_task'>crop_square</i>");
+            let newP1 = $(`<p class='task_value_incomplete'>${data[i]["task_value"]}</p>`);
+            let newP2 = $(`<p class='task_date_incomplete'>期限:${data[i]["completetion_date"]}</p>`);
+            let newI2 = $("<i class='material-icons delete_incomplete_task'>delete_forever</i>")                
+
+            newDiv.append(newI1);
+            newDiv.append(newP1);
+            newDiv.append(newP2);
+            newDiv.append(newI2);
+
+            $("#incomplete_tasks").append(newDiv);
+        //1以外の場合（0の場合）完了済みのタスク
+        }else{
+            let newDiv = $(`<div class='main-todo-body-complete_tasks' data-task_id=${data[i]["task_id"]}></div>`);
+            if(openCompleteFlag == 0){
+                newDiv.addClass('hidden');
+            }
+            let newI1 = $("<i class='material-icons check-complete_task'>done</i>");
+            let newP1 = $(`<p class='task_value_complete'>${data[i]["task_value"]}</p>`);
+            let newP2 = $(`<p class='task_date_complete'>期限:${data[i]["completetion_date"]}</p>`);
+            let newI2 = $("<i class='material-icons delete_complete_task'>delete_forever</i>")                
+
+            newDiv.append(newI1);
+            newDiv.append(newP1);
+            newDiv.append(newP2);
+            newDiv.append(newI2);
+
+            $("#complete_tasks").append(newDiv);
+        }
+        //表示タスクの作業状態変更を有効化する
+        let newTask = $(`[data-task_id=${task_id}]`);
+        newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status}, enableTaskStatusChangeButton);
+        //表示タスクの削除ボタン有効化
+        newTask.find(".delete_complete_task,.delete_incomplete_task").on("click", {value: task_id}, enableTaskDeleteButton);
+    }
+    //タスク数の表示を切り替える
+    let allIncompleteTaskCount = $(".main-todo-body-incomplete_tasks").length;
+    let allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
+    //console.log("未完了:" + allIncompleteTaskCount + "\n完了済み:" + allCompleteTaskCount);
+    $("#incomplete_task_count").text(allIncompleteTaskCount);
+    $("#complete_task_count").text(allCompleteTaskCount);
+}
+
+//タスク完了状態チェックボタン有効化
+function enableTaskStatusChangeButton(task_id_data){
+    let project_id = $(".selected_column").data("project_id");
+    task_id = task_id_data.data.task_id;
+    task_status = task_id_data.data.task_status;
+    //タスクのstatusを1,0切り替え
+    task_status = 1 - task_status;
+    //Ajax
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                project_id: project_id,
+                task_id: task_id,
+                task_status: task_status,
+                todo: "updateTaskStatus"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        //返ってきたタスク処理する
+        displayProjectTasks(data);
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("タスクの状態を変更できません\n" + e);
+    });
+}
+
 //プロジェクト入力欄選択中に、Enterを押した際
-//TODO e->status
 function inputProject(text){
     $.ajax("./post.php",  
         {
@@ -134,6 +225,9 @@ function inputProject(text){
         newProject.on("click", function(){
             $(".selected_column").removeClass("selected_column");
             newProject.addClass("selected_column");
+            //追加プロジェクト選択時には、該当のタスクを表示する
+            let select_project_id = this.id;
+            displayTaskOfSelectProject(select_project_id);
         });
         
 
@@ -163,12 +257,9 @@ function enableProjectDeleteButton(element){
 }
 
 //プロジェクトの削除
-//TODO e->status
 function deleteProject(id){
     //確認ダイアログ
-
     if(window.confirm("プロジェクトを削除してもよろしいですか？")){
-
         $.ajax("./post.php",
             {
                 type: "POST",
@@ -179,8 +270,27 @@ function deleteProject(id){
                 dataType: "json"
             }
         ).done(function(data){
+            //削除プロジェクトが選択中か確認する
+            let selectedColumn = $(".selected_column");
+            let selectedColumnId;
+            let isDeletedProjectWasSelected = false;
+            if(selectedColumn.hasClass("main-column-projects-project")){
+                selectedColumnId = String(selectedColumn.data("project_id"));
+                if(data === selectedColumnId){
+                    isDeletedProjectWasSelected = true;
+                }
+            }
+            //削除したプロジェクトを画面表示から消す
             let deleteElement = $(`[data-project_id=${data}]`);
             deleteElement.remove();
+            //削除プロジェクトが選択中だった場合、タスク画面表示を変更する
+            if(isDeletedProjectWasSelected){
+                $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+                $("#incomplete_task_count").text(0);
+                $("#complete_task_count").text(0);
+                $("#todo_title").text("プロジェクト未選択");
+                $(".main-todo-body-tasks-task").addClass("hidden");
+            }
         }).fail(function(XMLHttpRequest, status, e){
             alert("削除できませんでした" + e);
         });
@@ -189,11 +299,37 @@ function deleteProject(id){
 
 //タスク入力欄選択中にEnter
 function inputTask(text){
+    //日付未入力の場合、表示をして終了
     if($("#input_date").val() == false){
         alert("日付を入力してください");
-    }else{
-
+        return;
     }
+    //プロジェクト選択中なら、プロジェクトのIDとタスクの内容と、期限を取得
+    let selectedColumn = $(".selected_column");
+    if(selectedColumn.hasClass("main-column-projects-project")){
+        let project_id = selectedColumn.data("project_id");
+        let completetion_date = $("#input_date").val();
+        //AjaxでPOSTする
+        $.ajax("./post.php",
+            {
+                type: "POST",
+                data:{
+                    project_id: project_id,
+                    task_value: text,
+                    completetion_date: completetion_date,
+                    todo: "insertTaskToProject"
+                },
+                dataType: "json"
+            }
+        ).done(function(data){
+            displayProjectTasks(data);
+        }).fail(function(XMLHttpRequest, status, e){
+            alert("タスクを追加できませんでした\n" + e);
+        });
+    
+    }else{
+        alert("タスクの追加対象プロジェクトが選択されていません");
+    }  
 }
 
 //日付入力欄に初期値（今日）を設定
@@ -201,6 +337,7 @@ function initTaskDate(){
     let todayDate = new Date();
     let year = todayDate.getFullYear();
     let month = todayDate.getMonth() + 1;
+    //0詰めにする
     if(month < 10){
         month = "0" + month;
     }
@@ -208,7 +345,7 @@ function initTaskDate(){
     if(day < 10){
         day = "0" + day;
     }
-
+    //フォームの初期値を表示
     let todayInit = year + "-" + month + "-" + day;
     $("#input_date").val(todayInit);
 }
@@ -217,30 +354,40 @@ function initTaskDate(){
 function clickToday(){
     $(".selected_column").removeClass("selected_column");
     $("#today_task").addClass("selected_column");
+    removeHiddenClassOfTaskForm();
 }
 
 //明日ボタン
 function clickTomorrow(){
     $(".selected_column").removeClass("selected_column");
     $("#tomorrow_task").addClass("selected_column");
+    removeHiddenClassOfTaskForm();
 }
 //それ以降ボタン
 function clickLater(){
     $(".selected_column").removeClass("selected_column");
     $("#later_task").addClass("selected_column");
+    removeHiddenClassOfTaskForm();
 }
 
 //完了済みボタン
 function clickCompleted(){
     $(".selected_column").removeClass("selected_column");
-    $("#conpleted_task").addClass("selected_column");
+    $("#completed_task").addClass("selected_column");
+    removeHiddenClassOfTaskForm();
 }
 
+//タスク入力フォームを非表示にする
+function removeHiddenClassOfTaskForm(){
+    if(!$(".main-todo-body-tasks-task").hasClass("hidden")){
+        $(".main-todo-body-tasks-task").addClass("hidden");
+    }
+}
 
 //完了済みタスクの表示非表示 
 const display_on_text = "完了済みのタスクを非表示";
 const display_none_text = "完了済みのタスクを表示";
-let openCompleteFlag = 0;
+
 function openComplete(){
     let completeTaskDivs = document.getElementsByClassName("main-todo-body-complete_tasks");
     //非表示にする

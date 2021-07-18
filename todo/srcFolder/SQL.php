@@ -52,6 +52,22 @@ class SQL
         $pdo = null;
     }
 
+    //プロジェクト削除時、該当するタスクの全削除
+    public static function deleteProjectTasks($id)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = 'DELETE FROM `task` WHERE `project_id`= :id';
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':id' => $id));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+    }
+
     //プロジェクト選択時、タスクのINSERT
     public static function insertTaskToProject($project_id, $task_value, $completetion_date)
     {
@@ -83,5 +99,37 @@ class SQL
 
         $pdo = null;
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    //タスクを削除(単発)
+    public static function deleteTask($task_id)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = 'DELETE FROM `task` WHERE `task_id`= :id LIMIT 1';
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':id' => $task_id));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+    }
+
+    //タスクの完了状態更新
+    public static function updateTaskStatus($task_id, $task_status)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = 'UPDATE `task` SET `task_status`=:task_status WHERE `task_id`= :task_id LIMIT 1';
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':task_id' => $task_id, ':task_status' => $task_status));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
     }
 }

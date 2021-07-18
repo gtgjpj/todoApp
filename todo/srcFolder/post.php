@@ -11,12 +11,49 @@ switch ($_POST['todo']) {
     case "deleteProject":
         deleteProject();
         break;
-    case "insertTask":
-        insertTask();
+    case "insertTaskToProject":
+        insertTaskToProject();
         break;
     case "selectProjectTask":
         selectProjectTask();
         break;
+    case "deleteTask":
+        deleteTask();
+        break;
+    case "updateTaskStatus":
+        updateTaskStatus();
+        break;
+}
+
+//タスクの完了状態変更
+function updateTaskStatus()
+{
+    $project_id = $_POST['project_id'];
+    $task_id = $_POST['task_id'];
+    $task_status = $_POST['task_status'];
+    //データの更新
+    SQL::updateTaskStatus($task_id, $task_status);
+    //更新後のタスクの取得
+    $data = SQL::selectTaskFromProject(DB::h($project_id));
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
+//タスクの削除
+function deleteTask()
+{
+    $project_id = $_POST['project_id'];
+    $task_id = $_POST['task_id'];
+    //データの削除
+    SQL::deleteTask(DB::h($task_id));
+    //更新後のタスクの取得
+    $data = SQL::selectTaskFromProject(DB::h($project_id));
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
 }
 
 //プロジェクト選択時、該当プロジェクトのタスク一覧を返す
@@ -24,7 +61,7 @@ function selectProjectTask()
 {
     $project_id = $_POST['value'];
     //該当タスク取得
-    $new_tasks_row = SQL::selectTaskFromProject($project_id);
+    $new_tasks_row = SQL::selectTaskFromProject(DB::h($project_id));
     //新しいタスクのデータを返す
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($new_tasks_row);
@@ -53,27 +90,26 @@ function insertProject()
 }
 
 //プロジェクトの削除を行い、画面表示を行うためのプロジェクトの配列を返す
+
 function deleteProject()
 {
-    $data = $_POST['project_id'];
+    $project_id = $_POST['project_id'];
     //データの削除
-    SQL::deleteProject($data);
+    SQL::deleteProject(DB::h($project_id));
+    //該当タスクの全削除
+    SQL::deleteProjectTasks(DB::h($project_id));
     header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($data);
+    echo json_encode($_POST['project_id']);
     exit;
 }
 
 //タスクの追加を行い、画面表示を行うためのタスクの配列を返す
-function insertTask()
+function insertTaskToProject()
 {
-    $data[] = $_POST['project_id'];
-    $data[] = $_POST['task_value'];
-    $data[] = $_POST['completetion_date'];
-    $data[] = $_POST['input_date'];
     //タスクの追加
-    SQL::insertTaskToProject($data[0], $data[1], $data[2], $data[3]);
+    SQL::insertTaskToProject(DB::h($_POST['project_id']), DB::h($_POST['task_value']), DB::h($_POST['completetion_date']));
     //タスク追加後のプロジェクト内のタスク取得
-
+    $data = SQL::selectTaskFromProject($_POST['project_id']);
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;

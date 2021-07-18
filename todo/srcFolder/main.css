@@ -98,6 +98,7 @@
   height: 50px;
   background-color: #fff;
   display: flex;
+  margin-bottom: 10px;
 }
 .main-todo-result-incomplete,
 .main-todo-result-complete {
@@ -117,7 +118,6 @@
   width: 280px;
 }
 .main-todo-body-tasks-task {
-  margin-top: 10px;
   margin-left: 30px;
   width: 500px;
   height: 40px;

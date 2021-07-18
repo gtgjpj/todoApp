@@ -31,7 +31,7 @@
     <div>
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">User</p>
+            <p class="user">みんまるたすく</p>
             <i class="icon-settings material-icons">settings</i>
         </div>
         <div class="main">
@@ -51,7 +51,7 @@
                     <p>それ以降</p>
                     <p class="counts">0</p>
                 </div>
-                <div id=conpleted_task class="main-column-completed column_box">
+                <div id=completed_task class="main-column-completed column_box">
                     <i class="material-icons icon-column">check_circle_outline</i>
                     <p>完了済み</p>
                     <p class="counts">0</p>
@@ -82,17 +82,17 @@
                 <h2 id="todo_title">今日中</h2>
                 <div class="main-todo-result">
                     <div class="main-todo-result-incomplete">
-                        <h3>0</h3>
+                        <h3 id="incomplete_task_count">0</h3>
                         <p>未完了</p>
                     </div>
                     <div class="main-todo-result-complete">
-                        <h3>0</h3>
+                        <h3 id="complete_task_count">0</h3>
                         <p>完了済み</p>
                     </div>
                 </div>
                 <div class="main-todo-body">
                     <div class="main-todo-body-tasks">
-                        <div class="main-todo-body-tasks-task">
+                        <div class="main-todo-body-tasks-task hidden">
                             <i class="material-icons">add</i>
                             <input id="input_task" class="main-todo-body-tasks-task-text" type="text" maxlength="30" placeholder="ここにタスクを入力してEnter">
                             <input id="input_date" class="main-todo-body-tasks-task-date" type="date">
