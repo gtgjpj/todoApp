@@ -4,6 +4,66 @@ include_once("../DB.php");
 
 class SQL
 {
+    /**
+     * 完了済みのタスクを取得
+     *
+     * @return void
+     */
+    public static function selectCompletedTasks(){
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `task_status` = 0 ORDER BY `completetion_date`, `task_id` LIMIT 50";
+            $stmt = $pdo->query($sql);
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * 指定した日付以降のタスクを取得
+     *
+     * @param [type] $date
+     * @return void
+     */
+    public static function selectTaskFromThatDay($date){
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` >= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `task_id`";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':comp_date' => $date));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * 日付を指定してタスクを取得
+     *
+     * @return void
+     */
+    public static function selectTaskFromOneDay($date){
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` = STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `task_id`";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':comp_date' => $date));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     //プロジェクトのINSERT
     public static function insertProject($name)
     {

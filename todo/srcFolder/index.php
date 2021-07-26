@@ -79,7 +79,7 @@
                 </div>
             </div>
             <div class="main-todo">
-                <h2 id="todo_title">今日中</h2>
+                <h2 id="todo_title">今日</h2>
                 <div class="main-todo-result">
                     <div class="main-todo-result-incomplete">
                         <h3 id="incomplete_task_count">0</h3>
@@ -99,15 +99,11 @@
                         </div>
                     </div>
                     <div id="incomplete_tasks">
-
-
                     </div>
                     <div id="complete_task_button" class="main-todo-body-complete_task_button">
                         <p>完了済みのタスクを表示</p>
                     </div>
                     <div id="complete_tasks">
-
-
                     </div>
                 </div>
             </div>

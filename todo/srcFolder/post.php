@@ -23,6 +23,58 @@ switch ($_POST['todo']) {
     case "updateTaskStatus":
         updateTaskStatus();
         break;
+    case "selectTaskFromOneDay":
+        selectTaskFromOneDay();
+        break;
+    case "selectTaskFromThatDay":
+        selectTaskFromThatDay();
+        break;
+    case "selectCompletedTasks":
+        selectCompletedTasks();
+        break;
+    case "deleteTaskByTaskId":
+        deleteTaskByTaskId();
+        break;
+}
+
+//タスクIDを用いてタスクを削除
+function deleteTaskByTaskId(){
+    $task_id = $_POST['task_id'];
+    //データの削除
+    SQL::deleteTask(DB::h($task_id));
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($task_id);
+    exit;
+}
+
+//完了済みのタスクを取得
+function selectCompletedTasks(){
+    $data = SQL::selectCompletedTasks();
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
+//明後日以降のタスクを取得
+function selectTaskFromThatDay(){
+    $date = $_POST['finish_date'];
+    //データの取得
+    $data = SQL::selectTaskFromThatDay($date);
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
+//日付を指定して、タスクを取得
+function selectTaskFromOneDay(){
+    $date = $_POST['finish_date'];
+    //データの取得
+    $data = SQL::selectTaskFromOneDay($date);
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
 }
 
 //タスクの完了状態変更
@@ -34,7 +86,12 @@ function updateTaskStatus()
     //データの更新
     SQL::updateTaskStatus($task_id, $task_status);
     //更新後のタスクの取得
-    $data = SQL::selectTaskFromProject(DB::h($project_id));
+    $data = null;
+    if($project_id === null){
+        $data = "notProject";
+    }else{
+        $data = SQL::selectTaskFromProject(DB::h($project_id));
+    }
 
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
@@ -49,8 +106,11 @@ function deleteTask()
     //データの削除
     SQL::deleteTask(DB::h($task_id));
     //更新後のタスクの取得
-    $data = SQL::selectTaskFromProject(DB::h($project_id));
-
+    if($project_id === null){
+        $data = "notProject";
+    }else{
+        $data = SQL::selectTaskFromProject(DB::h($project_id));
+    }
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;
