@@ -39,22 +39,22 @@
                 <div id="today_task" class="main-column-today column_box selected_column">
                     <i class="material-icons icon-column">wb_sunny</i>
                     <p>今日</p>
-                    <p class="counts">0</p>
+                    <p class="counts"></p>
                 </div>
                 <div id="tomorrow_task" class="main-column-tomorrow column_box">
                     <i class="material-icons icon-column">wb_twilight</i>
                     <p>明日</p>
-                    <p class="counts">0</p>
+                    <p class="counts"></p>
                 </div>
                 <div id="later_task" class="main-column-later column_box">
                     <i class="material-icons icon-column">date_range</i>
                     <p>それ以降</p>
-                    <p class="counts">0</p>
+                    <p class="counts"></p>
                 </div>
                 <div id=completed_task class="main-column-completed column_box">
                     <i class="material-icons icon-column">check_circle_outline</i>
                     <p>完了済み</p>
-                    <p class="counts">0</p>
+                    <p class="counts"></p>
                 </div>
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects">
