@@ -1,0 +1,30 @@
+User(初期設定の場合)
+"root"
+
+pass(初期設定の場合)
+""
+
+データベース名
+"todo_2021_7"
+
+テーブル名1
+"project"
+
+カラム
+"project_id" int(11) AUTO_INCREMENT
+"project_name" varcher(30)
+"project_status" int(1)
+
+テーブル名2
+"task"
+
+カラム
+"task_id" int(11) AUTO_INCREMENT
+"project_id" int(11)
+"task_value" varchar(30)
+"completetion_date" date
+"task_status" int(1)
+
+
+
+

@@ -111,7 +111,7 @@
 }
 .main-todo-body {
   overflow-y: scroll;
-  max-height: 320px;
+  max-height: 310px;
 }
 .task_value_incomplete,
 .task_value_complete {
