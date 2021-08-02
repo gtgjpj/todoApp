@@ -31,7 +31,7 @@
     <div>
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.2.1</p>
+            <p class="user">みんまるたすく ver1.2.2</p>
             <i class="icon-settings material-icons">settings</i>
         </div>
         <div class="main">

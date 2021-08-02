@@ -13,7 +13,7 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `task_status` = 0 ORDER BY `completetion_date`, `task_id` LIMIT 50";
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `task_status` = 0 ORDER BY `completetion_date`, `task_id`";
             $stmt = $pdo->query($sql);
         } catch (PDOException $e) {
             die();
@@ -33,7 +33,7 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` >= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `task_id`";
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` >= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `completetion_date`,`task_id`";
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':comp_date' => $date));
         } catch (PDOException $e) {
