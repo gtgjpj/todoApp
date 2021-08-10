@@ -393,7 +393,7 @@ function inputProject(text){
             $(".selected_column").removeClass("selected_column");
             newProject.addClass("selected_column");
             //追加プロジェクト選択時には、該当のタスクを表示する
-            let select_project_id = this.id;
+            let select_project_id = $(this).data("project_id");
             displayTaskOfSelectProject(select_project_id);
         });
         
