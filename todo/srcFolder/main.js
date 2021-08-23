@@ -150,10 +150,8 @@ function displayProjectTasks(tasksDataArray){
         let task_status = tasksDataArray[i]["task_status"];
         //期限が過ぎている場合、赤字表記にする
         let today = new Date();
-        let finishDate;
-        let finishDateTimestamp;
-        finishDateTimestamp = today.getTime() - (1000 * 60 * 60 * 24 * 1);
-        finishDate = new Date(finishDateTimestamp);
+        let finishDateTimestamp = today.getTime();
+        let finishDate = new Date(finishDateTimestamp);
         let year = finishDate.getFullYear();
         let month = finishDate.getMonth() + 1;
         let date = finishDate.getDate();
