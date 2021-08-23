@@ -31,7 +31,7 @@
     <div>
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.2.3</p>
+            <p class="user">みんまるたすく ver1.3.0</p>
             <i class="icon-settings material-icons">settings</i>
         </div>
         <div class="main">
@@ -54,6 +54,11 @@
                 <div id=completed_task class="main-column-completed column_box">
                     <i class="material-icons icon-column">check_circle_outline</i>
                     <p>完了済み</p>
+                    <p class="counts"></p>
+                </div>
+                <div id=incomplete_task class="main-column-incomplete column_box">
+                    <i class="material-icons icon-column">new_releases</i>
+                    <p>期限超過</p>
                     <p class="counts"></p>
                 </div>
                 <hr class="hr_gray">

@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+.red {
+  color: red;
+}
+
 .icon-person {
   position: relative;
   top: 0px;
@@ -23,7 +27,7 @@
   margin-top: 5px;
   margin-left: 0;
   display: flex;
-  padding: 10px 0;
+  padding: 5px 0;
   align-items: center;
 }
 
@@ -50,6 +54,10 @@
 }
 .main-column-completed i {
   color: #777;
+}
+.main-column-incomplete i {
+  /* color: #ffd700; */
+  color: #ff5416cc;
 }
 
 .counts {

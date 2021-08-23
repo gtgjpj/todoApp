@@ -42,6 +42,8 @@
  * @function clickLater
  * //完了済みボタン
  * @function clickCompleted
+ * //未完了ボタン
+ * @function clickIncomplete
  * 
  * //表示、非表示処理
  * //タスク入力フォームを非表示にする
@@ -62,6 +64,7 @@ window.onload = function(){
     document.getElementById("tomorrow_task"       ).addEventListener("click", clickTomorrow );
     document.getElementById("later_task"          ).addEventListener("click", clickLater    );
     document.getElementById("completed_task"      ).addEventListener("click", clickCompleted);
+    document.getElementById("incomplete_task"      ).addEventListener("click", clickIncomplete);
 
     //プロジェクト選択機能初期化
     let projectElements = $(".main-column-projects-project");
@@ -145,6 +148,26 @@ function displayProjectTasks(tasksDataArray){
         let task_id = tasksDataArray[i]["task_id"];
         //新しいタスクのstatus
         let task_status = tasksDataArray[i]["task_status"];
+        //期限が過ぎている場合、赤字表記にする
+        let today = new Date();
+        let finishDate;
+        let finishDateTimestamp;
+        finishDateTimestamp = today.getTime() - (1000 * 60 * 60 * 24 * 1);
+        finishDate = new Date(finishDateTimestamp);
+        let year = finishDate.getFullYear();
+        let month = finishDate.getMonth() + 1;
+        let date = finishDate.getDate();
+        //trueの場合、赤字表示
+        let isExpired = false;
+        let completetion_array = tasksDataArray[i]["completetion_date"].split("-");
+        if(year > completetion_array[0]){
+            isExpired = true;
+        }else if(year == completetion_array[0] && month > completetion_array[1]){
+            isExpired = true;
+        }else if(year == completetion_array[0] && month == completetion_array[1] && date > completetion_array[2]){
+            isExpired = true;
+        }
+
         //1の場合、未完了のタスク
         if(tasksDataArray[i]["task_status"] == 1){
             let newDiv = $(`<div class='main-todo-body-incomplete_tasks' data-task_id=${tasksDataArray[i]["task_id"]}></div>`);
@@ -152,6 +175,11 @@ function displayProjectTasks(tasksDataArray){
             let newP1 = $(`<p class='task_value_incomplete'>${tasksDataArray[i]["task_value"]}</p>`);
             let newP2 = $(`<p class='task_date_incomplete'>期限:${tasksDataArray[i]["completetion_date"]}</p>`);
             let newI2 = $("<i class='material-icons delete_incomplete_task'>delete_forever</i>")                
+
+            //期限切れの場合、赤字にする
+            if(isExpired){
+                newP2.addClass("red");
+            }
 
             newDiv.append(newI1);
             newDiv.append(newP1);
@@ -189,6 +217,8 @@ function displayProjectTasks(tasksDataArray){
                 day = "tomorrow";
             }else if($(".selected_column").hasClass("main-column-later")){
                 day = "later";
+            }else if($(".selected_column").hasClass("main-column-incomplete")){
+                day = "incomplete";
             }
             newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status, selected_column: day}, enableTaskStatusChangeButtonSelectedDate);
         }
@@ -206,7 +236,8 @@ function displayProjectTasks(tasksDataArray){
 /**
  * 日付を指定してタスクを取得
  * @param day :検索表示する日付 
- */
+ * 
+*/
  function displayTasksByDayColumn(day){
     let today = new Date();
     let finishDate;
@@ -227,6 +258,12 @@ function displayProjectTasks(tasksDataArray){
             finishDate = new Date(finishDateTimestamp);
             todo = "selectTaskFromThatDay";
             break;
+        case "incomplete":
+            finishDateTimestamp = today.getTime() - (1000 * 60 * 60 * 24 * 1);
+            finishDate = new Date(finishDateTimestamp);
+            todo = "selectTaskUntilYesterday";
+            break;
+
     }
     let searchDate = finishDate.getFullYear() + "-" + (finishDate.getMonth() + 1) + "-" + finishDate.getDate();
     //searchDate = new Date(finishDate.getFullYear(), finishDate.getMonth(), finishDate.getDate());
@@ -323,6 +360,9 @@ function enableTaskStatusChangeButtonSelectedDate(task_id_data){
                 break;
             case "later":
                 clickLater();
+                break;
+            case "incomplete":
+                clickIncomplete();
                 break;
         }
 
@@ -616,6 +656,16 @@ function clickCompleted(){
         }).fail(function(XMLHttpRequest, status, e){
             alert("タスクを表示できませんでした\n" + e);
         });
+}
+
+//未完了タスクの表示
+function clickIncomplete(){
+    $(".selected_column").removeClass("selected_column");
+    $("#incomplete_task").addClass("selected_column");
+    removeHiddenClassOfTaskForm();
+    let selectedColumnName = "期限超過";
+    $("#todo_title").text(selectedColumnName);
+    displayTasksByDayColumn("incomplete");
 }
 
 //タスク入力フォームを非表示にする

@@ -4,6 +4,21 @@ include_once("../DB.php");
 
 class SQL
 {
+    public static function selectTaskUntilYesterday($date){
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` <= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `completetion_date`,`task_id`";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':comp_date' => $date));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /**
      * 完了済みのタスクを取得
      *
