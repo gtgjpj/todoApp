@@ -26,7 +26,7 @@ password:ユーザに該当するパスワード
 5. post.php:非同期通信時に用いるコードになります
 
 ### ローカルでXAMPPを使用する場合
-[XAMPP](https://www.apachefriends.org/jp/index.html)をダウンロード。  
+[XAMPP](https://www.apachefriends.org/jp/index.html)をインストール。  
 htdocsフォルダ内にtodoフォルダをそのまま保存。  
 localhost/todo/srcFolder/index.php  
 にブラウザでアクセスすることにより起動できます。
