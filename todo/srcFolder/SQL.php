@@ -127,22 +127,6 @@ class SQL
         $pdo = null;
     }
 
-    //プロジェクト削除時、該当するタスクの全削除
-    public static function deleteProjectTasks($id)
-    {
-        try {
-            $pdo = new PDO(DB::dsn, DB::username, DB::password);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'DELETE FROM `task` WHERE `project_id`= :id';
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute(array(':id' => $id));
-        } catch (PDOException $e) {
-            die();
-        }
-
-        $pdo = null;
-    }
-
     //プロジェクト選択時、タスクのINSERT
     public static function insertTaskToProject($project_id, $task_value, $completetion_date)
     {
