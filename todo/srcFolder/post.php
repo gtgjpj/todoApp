@@ -169,8 +169,6 @@ function deleteProject()
     $project_id = $_POST['project_id'];
     //データの削除
     SQL::deleteProject(DB::h($project_id));
-    //該当タスクの全削除
-    SQL::deleteProjectTasks(DB::h($project_id));
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($_POST['project_id']);
     exit;
