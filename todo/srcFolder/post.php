@@ -146,7 +146,7 @@ function insertProject()
 {
     $data = $_POST['value'];
     //プロジェクトの追加SQL送信
-    SQL::insertProject(DB::h($data));
+    SQL::insertProject($data);
     //追加後のプロジェクトを取得
     $new_project_stmt = SQL::selectProject();
 
