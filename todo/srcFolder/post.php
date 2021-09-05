@@ -152,8 +152,8 @@ function insertProject()
 
     $new_project_row =  array();
     foreach ($new_project_stmt as $row) {
-        $new_project_row[] = $row[0];
-        $new_project_row[] = $row[1];
+        $new_project_row[] = DB::h($row[0]);
+        $new_project_row[] = DB::h($row[1]);
     }
 
     //新しいプロジェクトのデータを返す
