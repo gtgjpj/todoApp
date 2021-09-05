@@ -8,7 +8,21 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` <= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `completetion_date`,`task_id`";
+            $sql = <<< EOF
+SELECT
+ `task_id`,
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+FROM
+ `task`
+WHERE
+ `completetion_date` <= STR_TO_DATE(:comp_date, '%Y-%m-%d')
+ORDER BY
+ `completetion_date`,
+ `task_id`
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':comp_date' => $date));
         } catch (PDOException $e) {
@@ -28,7 +42,21 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `task_status` = 0 ORDER BY `completetion_date`, `task_id`";
+            $sql = <<< EOF
+SELECT
+ `task_id`,
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+FROM
+ `task`
+WHERE
+ `task_status` = 0
+ORDER BY
+ `completetion_date`,
+ `task_id`
+EOF;
             $stmt = $pdo->query($sql);
         } catch (PDOException $e) {
             die();
@@ -48,7 +76,21 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` >= STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `completetion_date`,`task_id`";
+            $sql = <<< EOF
+SELECT
+ `task_id`,
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+FROM
+ `task`
+WHERE
+ `completetion_date` >= STR_TO_DATE(:comp_date, '%Y-%m-%d')
+ORDER BY
+ `completetion_date`,
+ `task_id`
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':comp_date' => $date));
         } catch (PDOException $e) {
@@ -68,7 +110,20 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `completetion_date` = STR_TO_DATE(:comp_date, '%Y-%m-%d')  ORDER BY `task_id`";
+            $sql = <<< EOF
+SELECT
+ `task_id`,
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+FROM
+ `task`
+WHERE
+ `completetion_date` = STR_TO_DATE(:comp_date, '%Y-%m-%d')
+ORDER BY
+ `task_id`
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':comp_date' => $date));
         } catch (PDOException $e) {
@@ -85,7 +140,19 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "INSERT INTO `project`(`project_name`, `project_status`) VALUES(:name, 1)";
+            $sql = <<< EOF
+INSERT INTO
+ `project`
+(
+ `project_name`,
+ `project_status`
+)
+VALUES
+(
+ :name,
+ 1
+)
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':name' => $name));
         } catch (PDOException $e) {
@@ -101,7 +168,18 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `project_id`, `project_name` FROM `project` WHERE `project_status` = 1  ORDER BY `project_id` DESC Limit 1";
+            $sql = <<< EOF
+SELECT
+ `project_id`,
+ `project_name`
+FROM
+ `project`
+WHERE
+ `project_status` = 1
+ORDER BY
+ `project_id`
+DESC LIMIT 1
+EOF;
             $stmt = $pdo->query($sql);
         } catch (PDOException $e) {
             die();
@@ -117,7 +195,12 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'DELETE FROM `project` WHERE `project_id`= :id LIMIT 1';
+            $sql = <<< EOF
+DELETE FROM
+ `project`
+WHERE
+ `project_id` = :id
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':id' => $id));
         } catch (PDOException $e) {
@@ -133,7 +216,23 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "INSERT INTO `task`(`project_id`,`task_value`, `completetion_date`, `task_status`) VALUES(:project_id, :task_value, :completetion_date, 1)";
+            $sql = <<< EOF
+INSERT INTO
+ `task`
+(
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+)
+VALUES
+(
+ :project_id,
+ :task_value,
+ :completetion_date,
+ 1
+)
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':project_id' => $project_id, ':task_value' => $task_value, ':completetion_date' => $completetion_date));
         } catch (PDOException $e) {
@@ -149,7 +248,20 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT `task_id`, `project_id`, `task_value`, `completetion_date`, `task_status` FROM `task` WHERE `project_id` = :project_id  ORDER BY `completetion_date`";
+            $sql = <<< EOF
+SELECT
+ `task_id`,
+ `project_id`,
+ `task_value`,
+ `completetion_date`,
+ `task_status`
+FROM
+ `task`
+WHERE
+ `project_id` = :project_id
+ORDER BY
+ `completetion_date`
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':project_id' => $project_id));
         } catch (PDOException $e) {
@@ -166,7 +278,12 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'DELETE FROM `task` WHERE `task_id`= :id LIMIT 1';
+            $sql = <<< EOF
+DELETE FROM
+ `task`
+WHERE
+ `task_id` = :id
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':id' => $task_id));
         } catch (PDOException $e) {
@@ -182,7 +299,14 @@ class SQL
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'UPDATE `task` SET `task_status`=:task_status WHERE `task_id`= :task_id LIMIT 1';
+            $sql = <<< EOF
+UPDATE
+ `task`
+SET
+ `task_status` = :task_status
+WHERE
+ `task_id` = :task_id
+EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':task_id' => $task_id, ':task_status' => $task_status));
         } catch (PDOException $e) {
