@@ -97,7 +97,8 @@
   margin: 20px 25px;
 }
 .main-todo {
-  border-left: solid 3px #fff;
+  border-left: solid 3px;
+  background-color: #eee;
 }
 
 .main-todo-result {

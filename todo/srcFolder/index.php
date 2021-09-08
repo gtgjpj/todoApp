@@ -31,7 +31,7 @@
     <div>
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.3.3</p>
+            <p class="user">みんまるたすく ver1.4.0</p>
             <i class="icon-settings material-icons">settings</i>
         </div>
         <div class="main">
@@ -114,6 +114,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../jquery-3.5.1.min.js"></script>
     <script src="./main.js"></script>

@@ -55,8 +55,25 @@
 
 //完了済みタスクの表示フラグ(0:非表示)
 let openCompleteTaskFlag = 0;
+//ダークモードの設定
+const options = {
+    bottom: '32px', // default: '32px'
+    right: '32px', // default: '32px'
+    left: 'unset', // default: 'unset'
+    time: '0.5s', // default: '0.3s'
+    mixColor: '#fff', // default: '#fff'
+    backgroundColor: '#fff',  // default: '#fff'
+    buttonColorDark: '#100f2c',  // default: '#100f2c'
+    buttonColorLight: '#fff', // default: '#fff'
+    saveInCookies: true, // default: true,
+    label: '🌓', // default: ''
+    autoMatchOsTheme: true // default: true
+}
 
 window.onload = function(){
+    //ダークモード機能
+    const darkmode = new Darkmode(options);
+    darkmode.showWidget();
     //完了済みタスクの開閉
     document.getElementById("complete_task_button").addEventListener("click", openComplete  );
     //左上リストのボタン機能
@@ -103,6 +120,11 @@ window.onload = function(){
             }
         }
     });
+}
+
+//ダークモード機能
+function addDarkmodeWidget() {
+    
 }
 
 /**
