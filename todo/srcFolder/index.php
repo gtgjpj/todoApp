@@ -16,7 +16,7 @@
 
     <?php
 
-    include("../DB.php");
+    include("./config/DB.php");
     include("./SQL.php");
 
     $pdo = new PDO(DB::dsn, DB::username, DB::password);

@@ -1,6 +1,6 @@
 <?php
 
-include_once('../DB.php');
+include_once('./config/DB.php');
 include_once('./SQL.php');
 
 //Ajaxで送られたtodoパラメータに応じた処理を行う
