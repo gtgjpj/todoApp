@@ -18,6 +18,10 @@
  * @function enableTaskStatusChangeButton
  * 
  * //プロジェクト関係
+ * //プロジェクトの一覧を取得して表示する
+ * @function displayProjects
+ * //プロジェクトの一覧初期表示
+ * @function initProjects
  * //プロジェクト入力欄選択中に、Enterを押した際
  * @function inputProject
  * //プロジェクトの初期ボタン有効化
@@ -26,6 +30,8 @@
  * @function enableProjectDeleteButton
  * //プロジェクトの削除
  * @function deleteProject
+ * //プロジェクトの末尾に追加
+ * @function appendProjectDiv
  * 
  * //入力フォーム
  * //タスク入力欄選択中にEnter
@@ -120,6 +126,8 @@ window.onload = function(){
             }
         }
     });
+    //プロジェクトの一覧初期表示
+    initProjects();
 }
 
 //ダークモード機能
@@ -418,6 +426,34 @@ function enableTaskStatusChangeButton(task_id_data){
     });
 }
 
+//プロジェクトの一覧を取得して表示する
+function displayProjects(projectsDataArray){
+    for(let i=0; i<projectsDataArray.length; i++){
+        let project_id = projectsDataArray[i]["project_id"];
+        let project_name = projectsDataArray[i]["project_name"];
+        appendProjectDiv(project_id, project_name);
+    }
+}
+
+//プロジェクトの一覧初期表示
+function initProjects(){
+    //タスク一覧を表示
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                todo: "selectProject"
+            },
+            dataType: "json"
+        }
+    ).done(function(projectsDataArray){
+        //返ってきたタスク処理する
+        displayProjects(projectsDataArray);
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("プロジェクトを表示できません\n" + e);
+    });
+}
+
 //プロジェクト入力欄選択中に、Enterを押した際
 function inputProject(text){
     $.ajax("./post.php",  
@@ -432,34 +468,40 @@ function inputProject(text){
     ).done(function(data){
         //追加時、入力したテキストボックスを空にする
         $("#input_project").val("");
-        //新しく追加する要素の用意
-        let newDiv = $(`<div data-project_id=${data[0]}></div>`);
-        newDiv.addClass("main-column-projects-project");
-        let newP = $("<p></p>");
-        let newIcon1 = $("<i class='material-icons'>label</i>");
-        let newIcon2 = $("<i class='material-icons delete_project_button'>delete_forever</i>")
-        newP.html(data[1]);
-        newDiv.append(newIcon1);
-        newDiv.append(newP);
-        newDiv.append(newIcon2);
-
         //プロジェクトの末尾に追加
-        $("#projects").append(newDiv);
-        //追加プロジェクトの削除ボタン有効化
-        let newProject = $(".main-column-projects div:last");
-        enableProjectDeleteButton(newProject);
-        //追加プロジェクトの選択を有効化
-        newProject.on("click", function(){
-            $(".selected_column").removeClass("selected_column");
-            newProject.addClass("selected_column");
-            //追加プロジェクト選択時には、該当のタスクを表示する
-            let select_project_id = $(this).data("project_id");
-            displayTaskOfSelectProject(select_project_id);
-        });
-        
-
+        for (let i=0; i < data.length; i++){
+            appendProjectDiv(data[i]["project_id"], data[i]["project_name"]);
+        }
     }).fail(function(XMLHttpRequest, status, e){
         alert("入力に失敗しました\n" + e);
+    });
+}
+
+//プロジェクトの末尾に追加
+function appendProjectDiv(project_id, project_name)
+{
+    //新しく追加する要素の用意
+    let newDiv = $(`<div data-project_id=${project_id}></div>`);
+    newDiv.addClass("main-column-projects-project");
+    let newP = $("<p></p>");
+    let newIcon1 = $("<i class='material-icons'>label</i>");
+    let newIcon2 = $("<i class='material-icons delete_project_button'>delete_forever</i>")
+    newP.html(project_name);
+    newDiv.append(newIcon1);
+    newDiv.append(newP);
+    newDiv.append(newIcon2);
+    $("#projects").append(newDiv);
+
+    //追加プロジェクトの削除ボタン有効化
+    let newProject = $(".main-column-projects div:last");
+    enableProjectDeleteButton(newProject);
+    //追加プロジェクトの選択を有効化
+    newProject.on("click", function(){
+        $(".selected_column").removeClass("selected_column");
+        newProject.addClass("selected_column");
+        //追加プロジェクト選択時には、該当のタスクを表示する
+        let select_project_id = $(this).data("project_id");
+        displayTaskOfSelectProject(select_project_id);
     });
 }
 
