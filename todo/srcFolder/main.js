@@ -437,7 +437,7 @@ function displayProjects(projectsDataArray){
 
 //プロジェクトの一覧初期表示
 function initProjects(){
-    //タスク一覧を表示
+    //プロジェクト一覧を表示
     $.ajax("./post.php",
         {
             type: "POST",
@@ -447,7 +447,7 @@ function initProjects(){
             dataType: "json"
         }
     ).done(function(projectsDataArray){
-        //返ってきたタスク処理する
+        //返ってきたプロジェクト処理する
         displayProjects(projectsDataArray);
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクトを表示できません\n" + e);
