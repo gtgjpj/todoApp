@@ -14,6 +14,9 @@ switch ($_POST['todo']) {
     case "insertTaskToProject":
         insertTaskToProject();
         break;
+    case "selectProject":
+        selectProject();
+        break;
     case "selectProjectTask":
         selectProjectTask();
         break;
@@ -129,6 +132,15 @@ function deleteTask()
     exit;
 }
 
+//プロジェクト一覧を返す
+function selectProject()
+{
+    $data = SQL::selectProject();
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
 //プロジェクト選択時、該当プロジェクトのタスク一覧を返す
 function selectProjectTask()
 {
@@ -146,19 +158,12 @@ function insertProject()
 {
     $data = $_POST['value'];
     //プロジェクトの追加SQL送信
-    SQL::insertProject($data);
+    $project_id = SQL::insertProject($data);
     //追加後のプロジェクトを取得
-    $new_project_stmt = SQL::selectProject();
-
-    $new_project_row =  array();
-    foreach ($new_project_stmt as $row) {
-        $new_project_row[] = DB::h($row[0]);
-        $new_project_row[] = DB::h($row[1]);
-    }
-
+    $new_projects_row = SQL::selectProject($project_id);
     //新しいプロジェクトのデータを返す
     header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($new_project_row);
+    echo json_encode($new_projects_row);
     exit;
 }
 

@@ -12,22 +12,6 @@
 </head>
 
 <body>
-
-
-    <?php
-
-    include("./config/DB.php");
-    include("./SQL.php");
-
-    $pdo = new PDO(DB::dsn, DB::username, DB::password);
-    //$pdo = new PDO(dsn, username, password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $sql = "SELECT `project_id`, `project_name` FROM `project` WHERE `project_status` = 1";
-    $stmt = $pdo->query($sql);
-
-    ?>
-
     <div>
         <div class="header">
             <i class="icon-person material-icons">person</i>
@@ -63,19 +47,6 @@
                 </div>
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects">
-
-                    <?php
-                    foreach ($stmt as $row) {
-                    ?><div class="main-column-projects-project" data-project_id="<?php echo $row[0]; ?>">
-                            <i class="material-icons">label</i>
-                            <p><?php echo DB::h($row[1]); ?></p>
-                            <i class="material-icons delete_project_button">delete_forever</i>
-                        </div><?php
-                            }
-                                ?>
-
-
-
                 </div>
                 <hr class="hr_gray">
                 <div id="add_project" class="main-column-add_project">

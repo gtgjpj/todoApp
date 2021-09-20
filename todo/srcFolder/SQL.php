@@ -137,6 +137,7 @@ EOF;
     //プロジェクトのINSERT
     public static function insertProject($name)
     {
+        $project_id = -1;
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -155,19 +156,26 @@ VALUES
 EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':name' => $name));
+            $project_id = $pdo->lastInsertId();
         } catch (PDOException $e) {
             die();
         }
 
         $pdo = null;
+        return $project_id;
     }
 
     //プロジェクトのSELECT
-    public static function selectProject()
+    public static function selectProject($project_id = -1)
     {
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$sql_project_id = "";
+			if ($project_id >= 0)
+			{
+				$sql_project_id = "AND `project_id` = {$project_id}";
+			}
             $sql = <<< EOF
 SELECT
  `project_id`,
@@ -176,9 +184,9 @@ FROM
  `project`
 WHERE
  `project_status` = 1
+{$sql_project_id}
 ORDER BY
  `project_id`
-DESC LIMIT 1
 EOF;
             $stmt = $pdo->query($sql);
         } catch (PDOException $e) {
@@ -186,7 +194,7 @@ EOF;
         }
 
         $pdo = null;
-        return $stmt;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     //プロジェクトのデリート
