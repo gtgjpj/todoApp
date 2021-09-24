@@ -176,6 +176,10 @@ function displayProjectTasks(tasksDataArray){
     for(let i=0; i<tasksDataArray.length; i++){
         //新しいタスクのid
         let task_id = tasksDataArray[i]["task_id"];
+        //新しいタスクの内容
+        let task_value = tasksDataArray[i]["task_value"];
+        //新しいタスクの期限
+        let task_completetion_date = tasksDataArray[i]["completetion_date"];
         //新しいタスクのstatus
         let task_status = tasksDataArray[i]["task_status"];
         //期限が過ぎている場合、赤字表記にする
@@ -187,7 +191,7 @@ function displayProjectTasks(tasksDataArray){
         let date = finishDate.getDate();
         //trueの場合、赤字表示
         let isExpired = false;
-        let completetion_array = tasksDataArray[i]["completetion_date"].split("-");
+        let completetion_array = task_completetion_date.split("-");
         if(year > completetion_array[0]){
             isExpired = true;
         }else if(year == completetion_array[0] && month > completetion_array[1]){
@@ -196,43 +200,33 @@ function displayProjectTasks(tasksDataArray){
             isExpired = true;
         }
 
-        //1の場合、未完了のタスク
-        if(tasksDataArray[i]["task_status"] == 1){
-            let newDiv = $(`<div class='main-todo-body-incomplete_tasks' data-task_id=${tasksDataArray[i]["task_id"]}></div>`);
-            let newI1 = $("<i class='material-icons check-incomplete_task'>crop_square</i>");
-            let newP1 = $(`<p class='task_value_incomplete'>${tasksDataArray[i]["task_value"]}</p>`);
-            let newP2 = $(`<p class='task_date_incomplete'>期限:${tasksDataArray[i]["completetion_date"]}</p>`);
-            let newI2 = $("<i class='material-icons delete_incomplete_task'>delete_forever</i>")                
-
-            //期限切れの場合、赤字にする
-            if(isExpired){
-                newP2.addClass("red");
-            }
-
-            newDiv.append(newI1);
-            newDiv.append(newP1);
-            newDiv.append(newP2);
-            newDiv.append(newI2);
-
-            $("#incomplete_tasks").append(newDiv);
-        //1以外の場合（0の場合）完了済みのタスク
-        }else{
-            let newDiv = $(`<div class='main-todo-body-complete_tasks' data-task_id=${tasksDataArray[i]["task_id"]}></div>`);
-            if(openCompleteTaskFlag == 0){
-                newDiv.addClass('hidden');
-            }
-            let newI1 = $("<i class='material-icons check-complete_task'>done</i>");
-            let newP1 = $(`<p class='task_value_complete'>${tasksDataArray[i]["task_value"]}</p>`);
-            let newP2 = $(`<p class='task_date_complete'>期限:${tasksDataArray[i]["completetion_date"]}</p>`);
-            let newI2 = $("<i class='material-icons delete_complete_task'>delete_forever</i>")                
-
-            newDiv.append(newI1);
-            newDiv.append(newP1);
-            newDiv.append(newP2);
-            newDiv.append(newI2);
-
-            $("#complete_tasks").append(newDiv);
+        //タスクテンプレートを用いてタスク一覧へ追加
+        const showCheck = true;
+        let isCompleted = tasksDataArray[i]["task_status"] != 1;
+        let template = document.querySelector('#task');
+        let clone = template.content.cloneNode(true);
+        clone.querySelector('.main-todo-body_tasks').classList.add(isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
+        clone.querySelector('.main-todo-body_tasks').setAttribute('data-task_id', task_id);
+        if(isCompleted && openCompleteTaskFlag == 0){
+            clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
         }
+        if(showCheck){
+            clone.querySelector('.check_task').classList.add(isCompleted ? 'check-complete_task' : 'check-incomplete_task');
+            clone.querySelector('.check_task').textContent = (isCompleted ? 'done' : 'crop_square');
+        }else{
+            clone.querySelector('.check_task').remove();
+        }
+        clone.querySelector('.task_value').classList.add(isCompleted ? 'task_value_complete' : 'task_value_incomplete');
+        clone.querySelector('.task_value').textContent = task_value;
+        clone.querySelector('.task_date').classList.add(isCompleted ? 'task_date_complete' : 'task_date_incomplete');
+        clone.querySelector('.task_date').textContent = `期限:${task_completetion_date}`;
+        //期限切れの場合、赤字にする
+        if(!isCompleted && isExpired){
+            clone.querySelector('.task_date').classList.add('red');
+        }
+        clone.querySelector('.delete_task').classList.add(isCompleted ? 'delete_complete_task' : 'delete_incomplete_task');
+        $(isCompleted ? "#complete_tasks" : "#incomplete_tasks").append(clone);
+
         //表示タスクの作業状態変更を有効化する
         let newTask = $(`[data-task_id=${task_id}]`);
         if($(".selected_column").hasClass("main-column-projects-project")){
@@ -481,16 +475,11 @@ function inputProject(text){
 function appendProjectDiv(project_id, project_name)
 {
     //新しく追加する要素の用意
-    let newDiv = $(`<div data-project_id=${project_id}></div>`);
-    newDiv.addClass("main-column-projects-project");
-    let newP = $("<p></p>");
-    let newIcon1 = $("<i class='material-icons'>label</i>");
-    let newIcon2 = $("<i class='material-icons delete_project_button'>delete_forever</i>")
-    newP.html(project_name);
-    newDiv.append(newIcon1);
-    newDiv.append(newP);
-    newDiv.append(newIcon2);
-    $("#projects").append(newDiv);
+    let template = document.querySelector('#project');
+    let clone = template.content.cloneNode(true);
+    clone.querySelector('.main-column-projects-project').setAttribute('data-project_id', project_id);
+    clone.querySelector('.name').textContent = project_name;
+    $("#projects").append(clone);
 
     //追加プロジェクトの削除ボタン有効化
     let newProject = $(".main-column-projects div:last");
@@ -671,22 +660,36 @@ function clickCompleted(){
         ).done(function(data){
             //変更前のタスク一覧を削除する
             $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+            const showCheck = false;
+            const isCompleted = true;
             for(let i=0; i<data.length; i++){
                 //新しいタスクのid
-                let task_id = data[i]["task_id"];         
-                let newDiv = $(`<div class='main-todo-body-complete_tasks' data-task_id=${data[i]["task_id"]}></div>`);
-                if(openCompleteTaskFlag == 0){
-                    newDiv.addClass('hidden');
+                let task_id = data[i]["task_id"];
+                //新しいタスクの内容
+                let task_value = data[i]["task_value"];
+                //新しいタスクの期限
+                let task_completetion_date = data[i]["completetion_date"];
+
+                //タスクテンプレートを用いてタスク一覧へ追加
+                let template = document.querySelector('#task');
+                let clone = template.content.cloneNode(true);
+                clone.querySelector('.main-todo-body_tasks').classList.add(isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
+                clone.querySelector('.main-todo-body_tasks').setAttribute('data-task_id', task_id);
+                if(isCompleted && openCompleteTaskFlag == 0){
+                    clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
                 }
-                let newP1 = $(`<p class='task_value_complete'>${data[i]["task_value"]}</p>`);
-                let newP2 = $(`<p class='task_date_complete'>期限:${data[i]["completetion_date"]}</p>`);
-                let newI2 = $("<i class='material-icons delete_complete_task'>delete_forever</i>")                
-
-                newDiv.append(newP1);
-                newDiv.append(newP2);
-                newDiv.append(newI2);
-
-                $("#complete_tasks").append(newDiv);
+                if(showCheck){
+                    clone.querySelector('.check_task').classList.add(isCompleted ? 'check-complete_task' : 'check-incomplete_task');
+                    clone.querySelector('.check_task').textContent = (isCompleted ? 'done' : 'crop_square');
+                }else{
+                    clone.querySelector('.check_task').remove();
+                }
+                clone.querySelector('.task_value').classList.add(isCompleted ? 'task_value_complete' : 'task_value_incomplete');
+                clone.querySelector('.task_value').textContent = task_value;
+                clone.querySelector('.task_date').classList.add(isCompleted ? 'task_date_complete' : 'task_date_incomplete');
+                clone.querySelector('.task_date').textContent = `期限:${task_completetion_date}`;
+                clone.querySelector('.delete_task').classList.add(isCompleted ? 'delete_complete_task' : 'delete_incomplete_task');
+                $(isCompleted ? "#complete_tasks" : "#incomplete_tasks").append(clone);
                 //タスク数の表示を切り替える
                 let allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
                 $("#incomplete_task_count").text(0);
