@@ -85,6 +85,23 @@
             </div>
         </div>
     </div>
+
+    <template id="project">
+        <div class="main-column-projects-project">
+            <i class="material-icons">label</i>
+            <p class="name"></p>
+            <i class="material-icons delete_project_button">delete_forever</i>
+        </div>
+    </template>
+    <template id="task">
+        <div class="main-todo-body_tasks">
+            <i class="material-icons check_task"></i>
+            <p class="task_value"></p>
+            <p class="task_date"></p>
+            <i class="material-icons delete_task">delete_forever</i>
+        </div>
+    </template>
+
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../jquery-3.5.1.min.js"></script>
