@@ -76,6 +76,22 @@ const options = {
     autoMatchOsTheme: true // default: true
 }
 
+//サウンドの初期設定
+let sound = new Audio();
+const soundVolume = 0.3;
+let soundNum = 0;
+sound.src = "";
+sound.volume = soundVolume;
+//豪華な音
+const luxurySoundSrc = "./sound/great.mp3";
+const luxurySoundIcon = "campaign";
+//シンプルな音
+const simpleSoundSrc = "./sound/simple.mp3";
+const simpleSoundIcon = "notifications";
+//無音
+const notSoundSrc = "";
+const notSoundIcon = "notifications_off";
+
 window.onload = function(){
     //ダークモード機能
     const darkmode = new Darkmode(options);
@@ -87,7 +103,31 @@ window.onload = function(){
     document.getElementById("tomorrow_task"       ).addEventListener("click", clickTomorrow );
     document.getElementById("later_task"          ).addEventListener("click", clickLater    );
     document.getElementById("completed_task"      ).addEventListener("click", clickCompleted);
-    document.getElementById("incomplete_task"      ).addEventListener("click", clickIncomplete);
+    document.getElementById("incomplete_task"     ).addEventListener("click", clickIncomplete);
+
+    //サウンドボタン有効化
+    document.getElementById("sound").addEventListener("click", function(){
+        if(soundNum === 0 || soundNum === 1){
+            soundNum++;
+        }else if(soundNum === 2){
+            soundNum = 0;
+        }
+        //サウンドアイコンと設定切り替え
+        switch(soundNum){
+            case 0:
+                sound.src = notSoundSrc;
+                document.getElementById("sound").innerText =notSoundIcon;
+                break;
+            case 1:
+                sound.src = simpleSoundSrc;
+                document.getElementById("sound").innerText = simpleSoundIcon;
+                break;
+            case 2:
+                sound.src = luxurySoundSrc;
+                document.getElementById("sound").innerText = luxurySoundIcon;
+                break;
+        }
+    });
 
     //プロジェクト選択機能初期化
     let projectElements = $(".main-column-projects-project");
@@ -358,6 +398,10 @@ function enableTaskStatusChangeButtonSelectedDate(task_id_data){
     selected_column = task_id_data.data.selected_column;
     //タスクのstatusを1,0切り替え
     task_status = 1 - task_status;
+    //タスクを完了状態にしたときのみ効果音を鳴らす
+    if(task_status === 0 && soundNum !== 0){
+        sound.play();
+    }
     //Ajax
     $.ajax("./post.php",
         {
@@ -400,6 +444,10 @@ function enableTaskStatusChangeButton(task_id_data){
     task_status = task_id_data.data.task_status;
     //タスクのstatusを1,0切り替え
     task_status = 1 - task_status;
+    //タスクを完了状態にしたときのみ効果音を鳴らす
+    if(task_status === 0 && soundNum !== 0){
+        sound.play();
+    }
     //Ajax
     $.ajax("./post.php",
         {
