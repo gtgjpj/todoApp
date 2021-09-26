@@ -1,4 +1,6 @@
 /**
+ * //サウンドの変更
+ * @function changeSoundIcon
  * //表示関係
  * //プロジェクトのタスク表示
  * @function displayTaskOfSelectProject
@@ -75,13 +77,6 @@ const options = {
     label: '🌓', // default: ''
     autoMatchOsTheme: true // default: true
 }
-
-//サウンドの初期設定
-let sound = new Audio();
-const soundVolume = 0.3;
-let soundNum = 0;
-sound.src = "";
-sound.volume = soundVolume;
 //豪華な音
 const luxurySoundSrc = "./sound/great.mp3";
 const luxurySoundIcon = "campaign";
@@ -91,8 +86,28 @@ const simpleSoundIcon = "notifications";
 //無音
 const notSoundSrc = "";
 const notSoundIcon = "notifications_off";
+//サウンドの初期設定
+let sound = new Audio();
+const soundVolume = 0.3;
+let soundNum = 0;
 
 window.onload = function(){
+    //cookieの読み込み
+    const readCookies = document.cookie;
+    const readCookiesArray = readCookies.split(";");
+    let soundCookie = 0;
+    readCookiesArray.forEach(element => {
+        const cookie = element.split("=");
+        if(cookie[0] === "todoSoundType"){
+            soundCookie = cookie[1];
+        }
+    });
+    //サウンドの初期設定
+    soundNum = Number(soundCookie);
+    sound.volume = soundVolume;
+    //cookieに合わせたサウンドの切り替え
+    changeSound();
+
     //ダークモード機能
     const darkmode = new Darkmode(options);
     darkmode.showWidget();
@@ -112,21 +127,8 @@ window.onload = function(){
         }else if(soundNum === 2){
             soundNum = 0;
         }
-        //サウンドアイコンと設定切り替え
-        switch(soundNum){
-            case 0:
-                sound.src = notSoundSrc;
-                document.getElementById("sound").innerText =notSoundIcon;
-                break;
-            case 1:
-                sound.src = simpleSoundSrc;
-                document.getElementById("sound").innerText = simpleSoundIcon;
-                break;
-            case 2:
-                sound.src = luxurySoundSrc;
-                document.getElementById("sound").innerText = luxurySoundIcon;
-                break;
-        }
+        //サウンドの切り替え
+        changeSound();
     });
 
     //プロジェクト選択機能初期化
@@ -170,9 +172,26 @@ window.onload = function(){
     initProjects();
 }
 
-//ダークモード機能
-function addDarkmodeWidget() {
-    
+/**
+ * サウンド設定切り替え
+ */
+function changeSound(){
+    switch(soundNum){
+        case 0:
+            sound.src = notSoundSrc;
+            document.getElementById("sound").innerText = notSoundIcon;
+            break;
+        case 1:
+            sound.src = simpleSoundSrc;
+            document.getElementById("sound").innerText = simpleSoundIcon;
+            break;
+        case 2:
+            sound.src = luxurySoundSrc;
+            document.getElementById("sound").innerText = luxurySoundIcon;
+            break;
+    }
+    //cookieの保存
+    document.cookie = `todoSoundType=${soundNum}`;
 }
 
 /**

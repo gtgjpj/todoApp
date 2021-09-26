@@ -191,6 +191,9 @@
   color: red;
 }
 
+.link {
+  width: 800px;
+}
 .link a {
   margin-left: 670px;
 }
