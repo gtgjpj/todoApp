@@ -15,7 +15,7 @@
     <div class="bodyDiv">
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.5.0</p>
+            <p class="user">みんまるたすく ver1.5.1</p>
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
         </div>
         <div class="main">
@@ -85,7 +85,10 @@
             </div>
         </div>
     </div>
-    <a href="https://maou.audio/">効果音：魔王魂</a>
+    <div class="link">
+        <a href="https://maou.audio/" target="_blank" rel="noopener noreferrer">効果音：魔王魂</a>
+    </div>
+    
 
     <template id="project">
         <div class="main-column-projects-project">
