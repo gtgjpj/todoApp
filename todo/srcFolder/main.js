@@ -232,6 +232,7 @@ function displayTaskOfSelectProject(project_id){
 function displayProjectTasks(tasksDataArray){
     //変更前のタスク一覧を削除する
     $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
+    const showCheck = !$(".selected_column").hasClass("main-column-completed");
     for(let i=0; i<tasksDataArray.length; i++){
         //新しいタスクのid
         let task_id = tasksDataArray[i]["task_id"];
@@ -260,8 +261,7 @@ function displayProjectTasks(tasksDataArray){
         }
 
         //タスクテンプレートを用いてタスク一覧へ追加
-        const showCheck = true;
-        let isCompleted = tasksDataArray[i]["task_status"] != 1;
+        const isCompleted = tasksDataArray[i]["task_status"] != 1;
         let template = document.querySelector('#task');
         let clone = template.content.cloneNode(true);
         clone.querySelector('.main-todo-body_tasks').classList.add(isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
@@ -288,20 +288,22 @@ function displayProjectTasks(tasksDataArray){
 
         //表示タスクの作業状態変更を有効化する
         let newTask = $(`[data-task_id=${task_id}]`);
-        if($(".selected_column").hasClass("main-column-projects-project")){
-            newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status}, enableTaskStatusChangeButton);
-        }else{
-            let day;
-            if($(".selected_column").hasClass("main-column-today")){
-                day = "today";
-            }else if($(".selected_column").hasClass("main-column-tomorrow")){
-                day = "tomorrow";
-            }else if($(".selected_column").hasClass("main-column-later")){
-                day = "later";
-            }else if($(".selected_column").hasClass("main-column-incomplete")){
-                day = "incomplete";
+        if(showCheck){
+            if($(".selected_column").hasClass("main-column-projects-project")){
+                newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status}, enableTaskStatusChangeButton);
+            }else{
+                let day;
+                if($(".selected_column").hasClass("main-column-today")){
+                    day = "today";
+                }else if($(".selected_column").hasClass("main-column-tomorrow")){
+                    day = "tomorrow";
+                }else if($(".selected_column").hasClass("main-column-later")){
+                    day = "later";
+                }else if($(".selected_column").hasClass("main-column-incomplete")){
+                    day = "incomplete";
+                }
+                newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status, selected_column: day}, enableTaskStatusChangeButtonSelectedDate);
             }
-            newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status, selected_column: day}, enableTaskStatusChangeButtonSelectedDate);
         }
         //表示タスクの削除ボタン有効化
         newTask.find(".delete_complete_task,.delete_incomplete_task").on("click", {value: task_id}, enableTaskDeleteButton);
@@ -725,66 +727,7 @@ function clickCompleted(){
                 dataType: "json"
             }
         ).done(function(data){
-            //変更前のタスク一覧を削除する
-            $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
-            const showCheck = false;
-            const isCompleted = true;
-            for(let i=0; i<data.length; i++){
-                //新しいタスクのid
-                let task_id = data[i]["task_id"];
-                //新しいタスクの内容
-                let task_value = data[i]["task_value"];
-                //新しいタスクの期限
-                let task_completetion_date = data[i]["completetion_date"];
-
-                //タスクテンプレートを用いてタスク一覧へ追加
-                let template = document.querySelector('#task');
-                let clone = template.content.cloneNode(true);
-                clone.querySelector('.main-todo-body_tasks').classList.add(isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
-                clone.querySelector('.main-todo-body_tasks').setAttribute('data-task_id', task_id);
-                if(isCompleted && openCompleteTaskFlag == 0){
-                    clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
-                }
-                if(showCheck){
-                    clone.querySelector('.check_task').classList.add(isCompleted ? 'check-complete_task' : 'check-incomplete_task');
-                    clone.querySelector('.check_task').textContent = (isCompleted ? 'done' : 'crop_square');
-                }else{
-                    clone.querySelector('.check_task').remove();
-                }
-                clone.querySelector('.task_value').classList.add(isCompleted ? 'task_value_complete' : 'task_value_incomplete');
-                clone.querySelector('.task_value').textContent = task_value;
-                clone.querySelector('.task_date').classList.add(isCompleted ? 'task_date_complete' : 'task_date_incomplete');
-                clone.querySelector('.task_date').textContent = `期限:${task_completetion_date}`;
-                clone.querySelector('.delete_task').classList.add(isCompleted ? 'delete_complete_task' : 'delete_incomplete_task');
-                $(isCompleted ? "#complete_tasks" : "#incomplete_tasks").append(clone);
-                //タスク数の表示を切り替える
-                let allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
-                $("#incomplete_task_count").text(0);
-                $("#complete_task_count").text(allCompleteTaskCount);
-                //表示タスクの削除ボタン有効化
-                let newTask = $(`[data-task_id=${task_id}]`);
-                newTask.find(".delete_complete_task,.delete_incomplete_task").on("click", function(){
-                    //Ajax
-                    $.ajax("./post.php",
-                        {
-                            type: "POST",
-                            data:{
-                                task_id: task_id,
-                                todo: "deleteTaskByTaskId"
-                            },
-                            dataType: "json"
-                        }
-                    ).done(function(data){
-                        //返ってきたタスク処理する
-                        $(`[data-task_id=${data}]`).remove();
-                        //タスク数の更新
-                        allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
-                        $("#complete_task_count").text(allCompleteTaskCount);
-                    }).fail(function(XMLHttpRequest, status, e){
-                        alert("タスクを削除できません\n" + e);
-                    });
-                });
-            }
+            displayProjectTasks(data);
         }).fail(function(XMLHttpRequest, status, e){
             alert("タスクを表示できませんでした\n" + e);
         });
