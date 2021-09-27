@@ -38,9 +38,6 @@ switch ($_POST['todo']) {
     case "selectTaskUntilYesterday":
         selectTaskUntilYesterday();
         break;
-    case "deleteTaskByTaskId":
-        deleteTaskByTaskId();
-        break;
 }
 
 //期限超過したタスクを表示
@@ -50,16 +47,6 @@ function selectTaskUntilYesterday(){
     $data = SQL::selectTaskUntilYesterday($date);
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
-    exit;
-}
-
-//タスクIDを用いてタスクを削除
-function deleteTaskByTaskId(){
-    $task_id = $_POST['task_id'];
-    //データの削除
-    SQL::deleteTask(DB::h($task_id));
-    header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($task_id);
     exit;
 }
 
