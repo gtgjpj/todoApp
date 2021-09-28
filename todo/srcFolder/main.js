@@ -60,6 +60,139 @@
  * @function openComplete
  */
 
+//ビューモデルクラス
+class ViewModel {
+    #projects;
+    #tasks;
+    constructor() {
+        //プロジェクト一覧
+        this.#projects = new Proxy([], {
+            get(target, prop){
+                const val = target[prop];
+                if(typeof val !== 'function') return val;
+                if(prop === 'push'){
+                    return function(el){
+                        return Array.prototype[prop].apply(target, arguments);
+                    }
+                }
+                if(prop === 'splice'){
+                    return function(start){
+                        if(start===0){
+                            return Array.prototype[prop].apply(target, arguments);
+                        }
+                    }
+                }
+                return val;
+            }
+        });
+
+        //タスク一覧
+        this.#tasks = new Proxy([], {
+            get(target, prop){
+                const val = target[prop];
+                if(typeof val !== 'function') return val;
+                if(prop === 'push'){
+                    return function(el){
+                        return Array.prototype[prop].apply(target, arguments);
+                    }
+                }
+                if(prop === 'splice'){
+                    return function(start){
+                        if(start===0){
+                            return Array.prototype[prop].apply(target, arguments);
+                        }
+                    }
+                }
+                return val;
+            }
+        });
+    }
+
+    //プロジェクト一覧
+    get projects(){ return this.#projects; }
+
+    //タスク一覧
+    get tasks(){ return this.#tasks; }
+    get incompleteTasks(){ return this.#tasks.filter(task => !task.isCompleted); }
+    get completedTasks(){ return this.#tasks.filter(task => task.isCompleted); }
+}
+
+//プロジェクトクラス(モデル)
+class Project {
+    #id = -1;
+    #name = '';
+    #color = 'black';
+    constructor(id, name, color){
+        this.id = id;
+        this.name = name;
+        this.color = color;
+    }
+
+    //プロジェクトID
+    get id(){ return this.#id; }
+    set id(value){ this.#id = value; }
+
+    //名称
+    get name(){ return this.#name; }
+    set name(value){ this.#name = value; }
+
+    // 色
+    get color(){ return this.#color; }
+    set color(value){ this.#color = value; }
+}
+
+//タスククラス(モデル)
+class Task{
+    #id = -1;
+    #projectId = -1;
+    #value = '';
+    #completetionDate = '9999-12-31';
+    #status = 1;
+    constructor(id, projectId, value, completetionDate, status){
+        this.id = id;
+        this.projectId = projectId;
+        this.value = value;
+        this.completetionDate = completetionDate;
+        this.status = status;
+    }
+
+    //タスクID
+    get id(){ return this.#id; }
+    set id(value){ this.#id = value; }
+
+    //プロジェクトID
+    get projectId(){ return this.#projectId; }
+    set projectId(value){ this.#projectId = value; }
+
+    //内容
+    get value(){ return this.#value; }
+    set value(value){ this.#value = value; }
+
+    //期限
+    get completetionDate(){ return this.#completetionDate; }
+    set completetionDate(value){ this.#completetionDate = value; }
+
+    //ステータス
+    get status(){ return this.#status; }
+    set status(value){ this.#status = value; }
+
+    //完了したか？
+    get isCompleted(){ return this.#status != 1; }
+
+    //期限切れか？
+    get isExpired(){
+        if (this.isCompleted) return false;
+        const completetion_array = this.completetionDate.split("-");
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1;
+        const date = today.getDate();
+        if(year < completetion_array[0]) return false;
+        if(year == completetion_array[0] && month < completetion_array[1]) return false;
+        if(year == completetion_array[0] && month == completetion_array[1] && date <= completetion_array[2]) return false;
+        return true;
+    }
+}
 
 //完了済みタスクの表示フラグ(0:非表示)
 let openCompleteTaskFlag = 0;
