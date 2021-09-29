@@ -179,7 +179,8 @@ EOF;
             $sql = <<< EOF
 SELECT
  `project_id`,
- `project_name`
+ `project_name`,
+ `color`
 FROM
  `project`
 WHERE
@@ -216,6 +217,30 @@ EOF;
         }
 
         $pdo = null;
+    }
+
+    //プロジェクトの色変更
+    public static function updateProjectColor($project_id, $color)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = <<< EOF
+UPDATE
+ `project`
+SET
+ `color` = :color
+WHERE
+ `project_id` = :project_id
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':project_id' => $project_id, ':color' => $color));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->rowCount();
     }
 
     //プロジェクト選択時、タスクのINSERT

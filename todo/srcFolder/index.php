@@ -88,17 +88,20 @@
     <div class="link">
         <a href="https://maou.audio/" target="_blank" rel="noopener noreferrer">効果音：魔王魂</a>
     </div>
-    
 
     <template id="project">
         <div class="main-column-projects-project">
-            <i class="material-icons">label</i>
+            <label class="label_project">
+                <i class="material-icons label_project_icon">label</i>
+            </label>
+            <input type="color" class="color-picker"/>
             <p class="name"></p>
             <i class="material-icons delete_project_button">delete_forever</i>
         </div>
     </template>
     <template id="task">
         <div class="main-todo-body_tasks">
+            <div class="task_project_color">&nbsp;</div>
             <i class="material-icons check_task"></i>
             <p class="task_value"></p>
             <p class="task_date"></p>

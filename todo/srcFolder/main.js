@@ -7,7 +7,7 @@
  * //選択したプロジェクトのタスクを取得し、画面更新
  * @function displayTaskOfSelectProject
  * //プロジェクトのタスク一覧を取得して表示する
- * @function displayProjectTasks
+ * @function displayTasks
  * //日付を指定してタスクを取得
  * @function displayTasksByDayColumn
  * 
@@ -26,8 +26,6 @@
  * @function initProjects
  * //プロジェクト入力欄選択中に、Enterを押した際
  * @function inputProject
- * //プロジェクトの初期ボタン有効化
- * @function initProjectDeleteButton
  * //プロジェクトの削除ボタン有効化
  * @function enableProjectDeleteButton
  * //プロジェクトの削除
@@ -64,22 +62,29 @@
 class ViewModel {
     #projects;
     #tasks;
+    #addProjectHandler = function(el){};
+    #removeProjectHandler = function(el){};
+    #addTaskHandler = function(el){};
+    #removeTaskHandler = function(){};
     constructor() {
         //プロジェクト一覧
+        var self = this;
         this.#projects = new Proxy([], {
             get(target, prop){
                 const val = target[prop];
                 if(typeof val !== 'function') return val;
                 if(prop === 'push'){
                     return function(el){
+                        self.addProjectHandler(el);
                         return Array.prototype[prop].apply(target, arguments);
                     }
                 }
                 if(prop === 'splice'){
-                    return function(start){
-                        if(start===0){
-                            return Array.prototype[prop].apply(target, arguments);
+                    return function(start, deleteCount){
+                        for(let i=0; i<deleteCount; i++){
+                            self.removeProjectHandler(this[start+i]);
                         }
+                        return Array.prototype[prop].apply(target, arguments);
                     }
                 }
                 return val;
@@ -93,14 +98,16 @@ class ViewModel {
                 if(typeof val !== 'function') return val;
                 if(prop === 'push'){
                     return function(el){
+                        self.addTaskHandler(el);
                         return Array.prototype[prop].apply(target, arguments);
                     }
                 }
                 if(prop === 'splice'){
-                    return function(start){
-                        if(start===0){
-                            return Array.prototype[prop].apply(target, arguments);
+                    return function(start, deleteCount){
+                        for(let i=0; i<deleteCount; i++){
+                            self.removeTaskHandler(this[start+i]);
                         }
+                        return Array.prototype[prop].apply(target, arguments);
                     }
                 }
                 return val;
@@ -110,11 +117,19 @@ class ViewModel {
 
     //プロジェクト一覧
     get projects(){ return this.#projects; }
+    get addProjectHandler() { return this.#addProjectHandler; }
+    set addProjectHandler(fn) { this.#addProjectHandler = fn; }
+    get removeProjectHandler() { return this.#removeProjectHandler; }
+    set removeProjectHandler(fn) { this.#removeProjectHandler = fn; }
 
     //タスク一覧
     get tasks(){ return this.#tasks; }
     get incompleteTasks(){ return this.#tasks.filter(task => !task.isCompleted); }
     get completedTasks(){ return this.#tasks.filter(task => task.isCompleted); }
+    get addTaskHandler() { return this.#addTaskHandler; }
+    set addTaskHandler(fn) { this.#addTaskHandler = fn; }
+    get removeTaskHandler() { return this.#removeTaskHandler; }
+    set removeTaskHandler(fn) { this.#removeTaskHandler = fn; }
 }
 
 //プロジェクトクラス(モデル)
@@ -193,6 +208,13 @@ class Task{
         return true;
     }
 }
+
+//ビューモデル
+const vm = new ViewModel();
+vm.addProjectHandler = appendProjectDiv;
+vm.removeProjectHandler = removeProjectDiv;
+vm.addTaskHandler = appendTaskDiv;
+vm.removeTaskHandler = removeTaskDiv;
 
 //完了済みタスクの表示フラグ(0:非表示)
 let openCompleteTaskFlag = 0;
@@ -275,10 +297,8 @@ window.onload = function(){
             displayTaskOfSelectProject(select_project_id);
         })
     })
-    //起動時、今日のタスク表示
-    clickToday();
-    //プロジェクトの削除ボタン初期設定
-    initProjectDeleteButton();
+    //プロジェクトの一覧初期表示
+    initProjects();
     //日付入力欄に初期値（今日）を入力
     initTaskDate();
     //Enterキー入力時の機能
@@ -301,8 +321,6 @@ window.onload = function(){
             }
         }
     });
-    //プロジェクトの一覧初期表示
-    initProjects();
 }
 
 /**
@@ -352,7 +370,7 @@ function displayTaskOfSelectProject(project_id){
         }
     ).done(function(tasksDataArray){
         //返ってきたタスク処理する
-        displayProjectTasks(tasksDataArray);
+        displayTasks(tasksDataArray);
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを表示できません\n" + e);
     });
@@ -362,91 +380,92 @@ function displayTaskOfSelectProject(project_id){
  * プロジェクトのタスク一覧を取得して表示する
  * @param tasksDataArray:
  */
-function displayProjectTasks(tasksDataArray){
+function displayTasks(tasksDataArray){
     //変更前のタスク一覧を削除する
-    $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
-    const showCheck = !$(".selected_column").hasClass("main-column-completed");
+    vm.tasks.splice(0, vm.tasks.length);
     for(let i=0; i<tasksDataArray.length; i++){
-        //新しいタスクのid
         let task_id = tasksDataArray[i]["task_id"];
+        //新しいタスクのプロジェクトID
+        let project_id = tasksDataArray[i]["project_id"];
         //新しいタスクの内容
         let task_value = tasksDataArray[i]["task_value"];
         //新しいタスクの期限
         let task_completetion_date = tasksDataArray[i]["completetion_date"];
         //新しいタスクのstatus
         let task_status = tasksDataArray[i]["task_status"];
-        //期限が過ぎている場合、赤字表記にする
-        let today = new Date();
-        let finishDateTimestamp = today.getTime();
-        let finishDate = new Date(finishDateTimestamp);
-        let year = finishDate.getFullYear();
-        let month = finishDate.getMonth() + 1;
-        let date = finishDate.getDate();
-        //trueの場合、赤字表示
-        let isExpired = false;
-        let completetion_array = task_completetion_date.split("-");
-        if(year > completetion_array[0]){
-            isExpired = true;
-        }else if(year == completetion_array[0] && month > completetion_array[1]){
-            isExpired = true;
-        }else if(year == completetion_array[0] && month == completetion_array[1] && date > completetion_array[2]){
-            isExpired = true;
-        }
 
-        //タスクテンプレートを用いてタスク一覧へ追加
-        const isCompleted = tasksDataArray[i]["task_status"] != 1;
-        let template = document.querySelector('#task');
-        let clone = template.content.cloneNode(true);
-        clone.querySelector('.main-todo-body_tasks').classList.add(isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
-        clone.querySelector('.main-todo-body_tasks').setAttribute('data-task_id', task_id);
-        if(isCompleted && openCompleteTaskFlag == 0){
-            clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
-        }
-        if(showCheck){
-            clone.querySelector('.check_task').classList.add(isCompleted ? 'check-complete_task' : 'check-incomplete_task');
-            clone.querySelector('.check_task').textContent = (isCompleted ? 'done' : 'crop_square');
-        }else{
-            clone.querySelector('.check_task').remove();
-        }
-        clone.querySelector('.task_value').classList.add(isCompleted ? 'task_value_complete' : 'task_value_incomplete');
-        clone.querySelector('.task_value').textContent = task_value;
-        clone.querySelector('.task_date').classList.add(isCompleted ? 'task_date_complete' : 'task_date_incomplete');
-        clone.querySelector('.task_date').textContent = `期限:${task_completetion_date}`;
-        //期限切れの場合、赤字にする
-        if(!isCompleted && isExpired){
-            clone.querySelector('.task_date').classList.add('red');
-        }
-        clone.querySelector('.delete_task').classList.add(isCompleted ? 'delete_complete_task' : 'delete_incomplete_task');
-        $(isCompleted ? "#complete_tasks" : "#incomplete_tasks").append(clone);
-
-        //表示タスクの作業状態変更を有効化する
-        let newTask = $(`[data-task_id=${task_id}]`);
-        if(showCheck){
-            if($(".selected_column").hasClass("main-column-projects-project")){
-                newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status}, enableTaskStatusChangeButton);
-            }else{
-                let day;
-                if($(".selected_column").hasClass("main-column-today")){
-                    day = "today";
-                }else if($(".selected_column").hasClass("main-column-tomorrow")){
-                    day = "tomorrow";
-                }else if($(".selected_column").hasClass("main-column-later")){
-                    day = "later";
-                }else if($(".selected_column").hasClass("main-column-incomplete")){
-                    day = "incomplete";
-                }
-                newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task_id, task_status: task_status, selected_column: day}, enableTaskStatusChangeButtonSelectedDate);
-            }
-        }
-        //表示タスクの削除ボタン有効化
-        newTask.find(".delete_complete_task,.delete_incomplete_task").on("click", {value: task_id}, enableTaskDeleteButton);
+        vm.tasks.push(new Task(task_id, project_id, task_value, task_completetion_date, task_status));
     }
     //タスク数の表示を切り替える
-    let allIncompleteTaskCount = $(".main-todo-body-incomplete_tasks").length;
-    let allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
-    //console.log("未完了:" + allIncompleteTaskCount + "\n完了済み:" + allCompleteTaskCount);
-    $("#incomplete_task_count").text(allIncompleteTaskCount);
-    $("#complete_task_count").text(allCompleteTaskCount);
+    $("#incomplete_task_count").text(vm.incompleteTasks.length);
+    $("#complete_task_count").text(vm.completedTasks.length);
+}
+
+/**
+ * タスク一覧に追加する
+ */
+function appendTaskDiv(task){
+    const showCheck = !$(".selected_column").hasClass("main-column-completed");
+
+    //タスクテンプレートを用いてタスク一覧へ追加
+    const template = document.querySelector('#task');
+    const clone = template.content.cloneNode(true);
+    clone.querySelector('.main-todo-body_tasks').classList.add(task.isCompleted ? 'main-todo-body-complete_tasks' : 'main-todo-body-incomplete_tasks');
+    clone.querySelector('.main-todo-body_tasks').setAttribute('data-task_id', task.id);
+    if(task.isCompleted && openCompleteTaskFlag == 0){
+        clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
+    }
+    let color = '#777777';
+    for(project of vm.projects){
+        if(project.id != task.projectId) continue;
+        color = project.color;
+        break;
+    }
+    clone.querySelector(".task_project_color").setAttribute("style", `background-color: ${color};`);
+    if(showCheck){
+        clone.querySelector('.check_task').classList.add(task.isCompleted ? 'check-complete_task' : 'check-incomplete_task');
+        clone.querySelector('.check_task').textContent = (task.isCompleted ? 'done' : 'crop_square');
+    }else{
+        clone.querySelector('.check_task').remove();
+    }
+    clone.querySelector('.task_value').classList.add(task.isCompleted ? 'task_value_complete' : 'task_value_incomplete');
+    clone.querySelector('.task_value').textContent = task.value;
+    clone.querySelector('.task_date').classList.add(task.isCompleted ? 'task_date_complete' : 'task_date_incomplete');
+    clone.querySelector('.task_date').textContent = `期限:${task.completetionDate}`;
+    //期限切れの場合、赤字にする
+    if(task.isExpired){
+        clone.querySelector('.task_date').classList.add('red');
+    }
+    clone.querySelector('.delete_task').classList.add(task.isCompleted ? 'delete_complete_task' : 'delete_incomplete_task');
+    $(task.isCompleted ? "#complete_tasks" : "#incomplete_tasks").append(clone);
+    //表示タスクの作業状態変更を有効化する
+    let newTask = $(`[data-task_id=${task.id}]`);
+    if(showCheck){
+        if($(".selected_column").hasClass("main-column-projects-project")){
+            newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task.id, task_status: task.status}, enableTaskStatusChangeButton);
+        }else{
+            let day;
+            if($(".selected_column").hasClass("main-column-today")){
+                day = "today";
+            }else if($(".selected_column").hasClass("main-column-tomorrow")){
+                day = "tomorrow";
+            }else if($(".selected_column").hasClass("main-column-later")){
+                day = "later";
+            }else if($(".selected_column").hasClass("main-column-incomplete")){
+                day = "incomplete";
+            }
+            newTask.find(".check-incomplete_task,.check-complete_task").on("click",{task_id: task.id, task_status: task.status, selected_column: day}, enableTaskStatusChangeButtonSelectedDate);
+        }
+    }
+    //表示タスクの削除ボタン有効化
+    newTask.find(".delete_complete_task,.delete_incomplete_task").on("click", {value: task.id}, enableTaskDeleteButton);
+}
+
+/**
+ * タスク一覧クリア
+ */
+function removeTaskDiv(task){
+    $(`[data-task_id=${task.id}]`).remove();
 }
 
 /**
@@ -495,7 +514,7 @@ function displayProjectTasks(tasksDataArray){
                 dataType: "json"
             }
         ).done(function(tasksDataArray){
-            displayProjectTasks(tasksDataArray);
+            displayTasks(tasksDataArray);
         }).fail(function(XMLHttpRequest, status, e){
             alert("タスクを表示できませんでした\n" + e);
         });
@@ -531,14 +550,15 @@ function displayProjectTasks(tasksDataArray){
         //返ってきたタスク処理する
         //プロジェクト選択時ではない場合、tasksDataArrayには"notProject"が入っている
         if(tasksDataArray !== "notProject"){
-            $(`[data-task_id=${task_id}]`).remove();
+            for(let i=0; i<vm.tasks.length; i++){
+                if(vm.tasks[i].id != task_id) continue;
+                vm.tasks.splice(i, 1);
+            }
             //タスク数の更新
-            let allIncompleteTaskCount = $(".main-todo-body-incomplete_tasks").length;
-            let allCompleteTaskCount = $(".main-todo-body-complete_tasks").length;
-            $("#incomplete_task_count").text(allIncompleteTaskCount);
-            $("#complete_task_count").text(allCompleteTaskCount);      
+            $("#incomplete_task_count").text(vm.incompleteTasks.length);
+            $("#complete_task_count").text(vm.completedTasks.length);      
         }else{
-            displayProjectTasks(tasksDataArray);
+            displayTasks(tasksDataArray);
         }
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを削除できません\n" + e);
@@ -570,7 +590,6 @@ function enableTaskStatusChangeButtonSelectedDate(task_id_data){
         }
     ).done(function(data){
         //返ってきたタスク処理する
-        //displayProjectTasks(data);
         switch(selected_column){
             case "today":
                 clickToday();
@@ -616,7 +635,7 @@ function enableTaskStatusChangeButton(task_id_data){
         }
     ).done(function(tasksDataArray){
         //返ってきたタスク処理する
-        displayProjectTasks(tasksDataArray);
+        displayTasks(tasksDataArray);
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクの状態を変更できません\n" + e);
     });
@@ -625,9 +644,11 @@ function enableTaskStatusChangeButton(task_id_data){
 //プロジェクトの一覧を取得して表示する
 function displayProjects(projectsDataArray){
     for(let i=0; i<projectsDataArray.length; i++){
-        let project_id = projectsDataArray[i]["project_id"];
-        let project_name = projectsDataArray[i]["project_name"];
-        appendProjectDiv(project_id, project_name);
+        const project_id = projectsDataArray[i]["project_id"];
+        const project_name = projectsDataArray[i]["project_name"];
+        let color = projectsDataArray[i]["color"];
+        if(color === null) color = '#777777';
+        vm.projects.push(new Project(project_id, project_name, color));
     }
 }
 
@@ -645,6 +666,8 @@ function initProjects(){
     ).done(function(projectsDataArray){
         //返ってきたプロジェクト処理する
         displayProjects(projectsDataArray);
+        //今日のタスク表示
+        clickToday();
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクトを表示できません\n" + e);
     });
@@ -666,7 +689,9 @@ function inputProject(text){
         $("#input_project").val("");
         //プロジェクトの末尾に追加
         for (let i=0; i < data.length; i++){
-            appendProjectDiv(data[i]["project_id"], data[i]["project_name"]);
+            let color = data[i]["color"];
+            if(color === null) color = '#777';
+            vm.projects.push(new Project(data[i]["project_id"], data[i]["project_name"], color));
         }
     }).fail(function(XMLHttpRequest, status, e){
         alert("入力に失敗しました\n" + e);
@@ -674,13 +699,22 @@ function inputProject(text){
 }
 
 //プロジェクトの末尾に追加
-function appendProjectDiv(project_id, project_name)
+function appendProjectDiv(project)
 {
     //新しく追加する要素の用意
     let template = document.querySelector('#project');
     let clone = template.content.cloneNode(true);
-    clone.querySelector('.main-column-projects-project').setAttribute('data-project_id', project_id);
-    clone.querySelector('.name').textContent = project_name;
+    clone.querySelector('.main-column-projects-project').setAttribute('data-project_id', project.id);
+    let cpId = `cp-project_id_${project.id}`;
+    clone.querySelector('.label_project').htmlFor = cpId;
+    clone.querySelector('.color-picker').id = cpId;
+    clone.querySelector('.color-picker').value = project.color;
+    clone.querySelector('.color-picker').setAttribute('project_id', project.id);
+    clone.querySelector('.color-picker').addEventListener('change', function(){
+        changeProjectColor(this.getAttribute('project_id'), this.value);
+    });
+    clone.querySelector('.label_project_icon').style.color = project.color;
+    clone.querySelector('.name').textContent = project.name;
     $("#projects").append(clone);
 
     //追加プロジェクトの削除ボタン有効化
@@ -696,15 +730,11 @@ function appendProjectDiv(project_id, project_name)
     });
 }
 
-//プロジェクトの初期ボタン有効化
-function initProjectDeleteButton(){
-    //プロジェクトの数
-    let allProject = $(".main-column-projects-project");
-    for(let i=1; i<=allProject.length; i++){
-        let lastDeleteButton = $(`.main-column-projects div:nth-child(${i})`);
-        enableProjectDeleteButton(lastDeleteButton);
-    }
-    
+//プロジェクトを除去
+function removeProjectDiv(project)
+{
+    let deleteElement = $(`[data-project_id=${project.id}]`);
+    deleteElement.remove();
 }
 
 //プロジェクトの削除ボタン有効化
@@ -714,6 +744,46 @@ function enableProjectDeleteButton(element){
         let buttonId = element.attr("data-project_id");
         deleteProject(buttonId);
     })
+}
+
+//プロジェクトの色変更
+function changeProjectColor(id, color){
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                project_id: id,
+                color: color,
+                todo: "updateProjectColor"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        if(data != 1){
+            alert("プロジェクト色変更できませんでした");
+            return;
+        }
+        for(project of vm.projects){
+            if(project.id != id) continue;
+            project.color = color;
+            const projectDiv = $(`[data-project_id=${project.id}]`);
+            const icons = projectDiv.find('.label_project_icon');
+            for(const icon of icons){
+                icon.style.color = project.color;
+            }
+            break;
+        }
+        for(task of vm.tasks){
+            if(task.projectId != id) continue;
+            const taskDiv = $(`[data-task_id=${task.id}]`);
+            const stickies = taskDiv.find('.task_project_color');
+            for(const sticky of stickies){
+                sticky.style.backgroundColor = color;
+            }
+        }
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("プロジェクト色変更できませんでした" + e);
+    });
 }
 
 //プロジェクトの削除
@@ -741,13 +811,16 @@ function deleteProject(id){
                 }
             }
             //削除したプロジェクトを画面表示から消す
-            let deleteElement = $(`[data-project_id=${data}]`);
-            deleteElement.remove();
+            for(let i=0; i<vm.projects.length; i++){
+                if(vm.projects[i].id != data) continue;
+                vm.projects.splice(i, 1);
+                break;
+            }
             //削除プロジェクトが選択中だった場合、タスク画面表示を変更する
             if(isDeletedProjectWasSelected){
-                $(".main-todo-body-incomplete_tasks,.main-todo-body-complete_tasks").remove();
-                $("#incomplete_task_count").text(0);
-                $("#complete_task_count").text(0);
+                vm.tasks.splice(0, vm.tasks.length);
+                $("#incomplete_task_count").text(vm.incompleteTasks.length);
+                $("#complete_task_count").text(vm.completedTasks.length);
                 $("#todo_title").text("プロジェクト未選択");
                 $(".main-todo-body-tasks-task").addClass("hidden");
             }
@@ -784,7 +857,7 @@ function inputTask(text){
         ).done(function(tasksDataArray){
             //入力したタスク名を空白にする
             $("#input_task").val("");
-            displayProjectTasks(tasksDataArray);
+            displayTasks(tasksDataArray);
         }).fail(function(XMLHttpRequest, status, e){
             alert("タスクを追加できませんでした\n" + e);
         });
@@ -860,7 +933,7 @@ function clickCompleted(){
                 dataType: "json"
             }
         ).done(function(data){
-            displayProjectTasks(data);
+            displayTasks(data);
         }).fail(function(XMLHttpRequest, status, e){
             alert("タスクを表示できませんでした\n" + e);
         });

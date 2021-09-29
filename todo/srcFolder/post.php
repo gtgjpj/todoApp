@@ -11,6 +11,9 @@ switch ($_POST['todo']) {
     case "deleteProject":
         deleteProject();
         break;
+    case "updateProjectColor":
+        updateProjectColor();
+        break;
     case "insertTaskToProject":
         insertTaskToProject();
         break;
@@ -163,6 +166,19 @@ function deleteProject()
     SQL::deleteProject(DB::h($project_id));
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($_POST['project_id']);
+    exit;
+}
+
+//プロジェクトの色変更
+function updateProjectColor()
+{
+    $project_id = $_POST['project_id'];
+    $color = $_POST['color'];
+    //データの更新
+    $count = SQL::updateProjectColor($project_id, $color);
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($count);
     exit;
 }
 
