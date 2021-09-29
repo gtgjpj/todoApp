@@ -122,6 +122,9 @@
   overflow-y: scroll;
   max-height: 310px;
 }
+.task_project_color {
+  height: 30px;
+}
 .task_value_incomplete,
 .task_value_complete {
   width: 280px;
@@ -196,4 +199,12 @@
 }
 .link a {
   margin-left: 670px;
+}
+
+.label_project {
+  display: flex;
+}
+.color-picker {
+  position: absolute;
+  visibility: hidden;
 }
