@@ -41,6 +41,10 @@ ver1.5.0にて魔王魂様(https://maou.audio/) よりお借りした効果音�
    username:データベースのユーザ名  
    password:ユーザに該当するパスワード
    **※必ずDB.phpへリネームしてご利用ください**
+   
+### 使用ライブラリ等  
+- [jQuery](https://jquery.com/)  
+- [darkmode.js](https://darkmodejs.learn.uno/)  
 
 ### ローカルで XAMPP を使用する場合
 
