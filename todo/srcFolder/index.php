@@ -92,7 +92,7 @@
     <template id="project">
         <div class="main-column-projects-project">
             <label class="label_project">
-                <i class="material-icons label_project_icon">label</i>
+                <i class="material-icons label_project_icon darkmode-ignore">label</i>
             </label>
             <input type="color" class="color-picker"/>
             <p class="name"></p>
@@ -101,7 +101,7 @@
     </template>
     <template id="task">
         <div class="main-todo-body_tasks">
-            <div class="task_project_color">&nbsp;</div>
+            <div class="task_project_color darkmode-ignore">&nbsp;</div>
             <i class="material-icons check_task"></i>
             <p class="task_value"></p>
             <p class="task_date"></p>
