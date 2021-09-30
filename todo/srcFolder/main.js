@@ -65,7 +65,7 @@ class ViewModel {
     #addProjectHandler = function(el){};
     #removeProjectHandler = function(el){};
     #addTaskHandler = function(el){};
-    #removeTaskHandler = function(){};
+    #removeTaskHandler = function(el){};
     constructor() {
         //プロジェクト一覧
         var self = this;
@@ -690,7 +690,7 @@ function inputProject(text){
         //プロジェクトの末尾に追加
         for (let i=0; i < data.length; i++){
             let color = data[i]["color"];
-            if(color === null) color = '#777';
+            if(color === null) color = '#777777';
             vm.projects.push(new Project(data[i]["project_id"], data[i]["project_name"], color));
         }
     }).fail(function(XMLHttpRequest, status, e){
