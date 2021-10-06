@@ -45,6 +45,7 @@ ver1.5.0にて魔王魂様(https://maou.audio/) よりお借りした効果音�
 ### 使用ライブラリ等  
 - [jQuery](https://jquery.com/)  
 - [darkmode.js](https://darkmodejs.learn.uno/)  
+- [Knockout](https://knockoutjs.com/)  
 
 ### ローカルで XAMPP を使用する場合
 
