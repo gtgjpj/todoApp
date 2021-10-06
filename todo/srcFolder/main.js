@@ -363,8 +363,8 @@ function displayTaskOfSelectProject(project_id){
         {
             type: "POST",
             data:{
-                value: project_id,
-                todo: "selectProjectTask"
+                project_id: project_id,
+                todo: "selectTasks"
             },
             dataType: "json"
         }
