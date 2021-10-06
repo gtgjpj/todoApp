@@ -275,12 +275,35 @@ EOF;
         $pdo = null;
     }
 
-    //プロジェクト選択時、タスクのSELECT
-    public static function selectTaskFromProject($project_id)
+    //タスクのSELECT
+    public static function selectTasks($project_id, $date_from, $date_to, $status)
     {
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sqlWhere = "";
+            $array = array();
+            if($project_id != null && strlen($project_id) > 0){
+                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+                $sqlWhere .= " `project_id` = :project_id ";
+                $array[":project_id"] = $project_id;
+            }
+            if($date_from != null && strlen($date_from) > 0){
+                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+                $sqlWhere .= " `completetion_date` >= STR_TO_DATE(:date_from, '%Y-%m-%d') ";
+                $array[":date_from"] = $date_from;
+            }
+            if($date_to != null && strlen($date_to) > 0){
+                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+                $sqlWhere .= " `completetion_date` <= STR_TO_DATE(:date_to, '%Y-%m-%d') ";
+                $array[":date_to"] = $date_to;
+            }
+            if($status != null && strlen($status) > 0){
+                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+                $sqlWhere .= " `status` = :status ";
+                $array[":status"] = $status;
+            }
+            if (strlen($sqlWhere) > 0) $sqlWhere = "WHERE" . $sqlWhere;
             $sql = <<< EOF
 SELECT
  `task_id`,
@@ -290,13 +313,13 @@ SELECT
  `task_status`
 FROM
  `task`
-WHERE
- `project_id` = :project_id
+{$sqlWhere}
 ORDER BY
- `completetion_date`
+ `completetion_date`,
+ `task_id`
 EOF;
             $stmt = $pdo->prepare($sql);
-            $stmt->execute(array(':project_id' => $project_id));
+            $stmt->execute($array);
         } catch (PDOException $e) {
             die();
         }

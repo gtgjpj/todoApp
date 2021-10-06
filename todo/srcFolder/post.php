@@ -20,8 +20,8 @@ switch ($_POST['todo']) {
     case "selectProject":
         selectProject();
         break;
-    case "selectProjectTask":
-        selectProjectTask();
+    case "selectTasks":
+        selectTasks();
         break;
     case "deleteTask":
         deleteTask();
@@ -96,7 +96,7 @@ function updateTaskStatus()
     if($project_id === null){
         $data = "notProject";
     }else{
-        $data = SQL::selectTaskFromProject(DB::h($project_id));
+        $data = SQL::selectTasks($project_id, null, null, null);
     }
 
     header("Content-type: application/json; charset=UTF-8");
@@ -115,7 +115,7 @@ function deleteTask()
     if($project_id === null){
         $data = "notProject";
     }else{
-        $data = SQL::selectTaskFromProject(DB::h($project_id));
+        $data = SQL::selectTasks($project_id, null, null, null);
     }
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
@@ -131,12 +131,15 @@ function selectProject()
     exit;
 }
 
-//プロジェクト選択時、該当プロジェクトのタスク一覧を返す
-function selectProjectTask()
+//タスク一覧を返す
+function selectTasks()
 {
-    $project_id = $_POST['value'];
+    $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : null;
+    $date_from = isset($_POST['date_from']) ? $_POST['date_from'] : null;
+    $date_to = isset($_POST['date_to']) ? $_POST['date_to'] : null;
+    $status = isset($_POST['status']) ? $_POST['status'] : null;
     //該当タスク取得
-    $new_tasks_row = SQL::selectTaskFromProject(DB::h($project_id));
+    $new_tasks_row = SQL::selectTasks($project_id, $date_from, $date_to, $status);
     //新しいタスクのデータを返す
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($new_tasks_row);
@@ -188,7 +191,7 @@ function insertTaskToProject()
     //タスクの追加
     SQL::insertTaskToProject(DB::h($_POST['project_id']), DB::h($_POST['task_value']), DB::h($_POST['completetion_date']));
     //タスク追加後のプロジェクト内のタスク取得
-    $data = SQL::selectTaskFromProject($_POST['project_id']);
+    $data = SQL::selectTasks($_POST['project_id'], null, null, null);
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;
