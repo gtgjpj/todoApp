@@ -46,7 +46,15 @@
                     <p class="counts"></p>
                 </div>
                 <hr class="hr_gray">
-                <div id="projects" class="main-column-projects">
+                <div id="projects" class="main-column-projects" data-bind="foreach: projects">
+                    <div class="main-column-projects-project" data-bind="click: $root.selectProject, attr: { 'data-project_id': id }">
+                        <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }">
+                            <i class="material-icons label_project_icon darkmode-ignore" data-bind="style: { color: color }">label</i>
+                        </label>
+                        <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
+                        <p class="name" data-bind="text: name"></p>
+                        <i class="material-icons delete_project_button" data-bind="click: deleteProject, clickBubble: false">delete_forever</i>
+                    </div>
                 </div>
                 <hr class="hr_gray">
                 <div id="add_project" class="main-column-add_project">
@@ -89,16 +97,6 @@
         <a href="https://maou.audio/" target="_blank" rel="noopener noreferrer">効果音：魔王魂</a>
     </div>
 
-    <template id="project">
-        <div class="main-column-projects-project">
-            <label class="label_project">
-                <i class="material-icons label_project_icon darkmode-ignore">label</i>
-            </label>
-            <input type="color" class="color-picker"/>
-            <p class="name"></p>
-            <i class="material-icons delete_project_button">delete_forever</i>
-        </div>
-    </template>
     <template id="task">
         <div class="main-todo-body_tasks">
             <div class="task_project_color darkmode-ignore">&nbsp;</div>

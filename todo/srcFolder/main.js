@@ -30,8 +30,6 @@
  * @function enableProjectDeleteButton
  * //プロジェクトの削除
  * @function deleteProject
- * //プロジェクトの末尾に追加
- * @function appendProjectDiv
  * 
  * //入力フォーム
  * //タスク入力欄選択中にEnter
@@ -60,38 +58,13 @@
 
 //ビューモデルクラス
 class ViewModel {
-    #projects;
+    #projects = ko.observableArray();
     #tasks;
-    #addProjectHandler = function(el){};
-    #removeProjectHandler = function(el){};
     #addTaskHandler = function(el){};
     #removeTaskHandler = function(el){};
     constructor() {
-        //プロジェクト一覧
-        var self = this;
-        this.#projects = new Proxy([], {
-            get(target, prop){
-                const val = target[prop];
-                if(typeof val !== 'function') return val;
-                if(prop === 'push'){
-                    return function(el){
-                        self.addProjectHandler(el);
-                        return Array.prototype[prop].apply(target, arguments);
-                    }
-                }
-                if(prop === 'splice'){
-                    return function(start, deleteCount){
-                        for(let i=0; i<deleteCount; i++){
-                            self.removeProjectHandler(this[start+i]);
-                        }
-                        return Array.prototype[prop].apply(target, arguments);
-                    }
-                }
-                return val;
-            }
-        });
-
         //タスク一覧
+        var self = this;
         this.#tasks = new Proxy([], {
             get(target, prop){
                 const val = target[prop];
@@ -117,10 +90,12 @@ class ViewModel {
 
     //プロジェクト一覧
     get projects(){ return this.#projects; }
-    get addProjectHandler() { return this.#addProjectHandler; }
-    set addProjectHandler(fn) { this.#addProjectHandler = fn; }
-    get removeProjectHandler() { return this.#removeProjectHandler; }
-    set removeProjectHandler(fn) { this.#removeProjectHandler = fn; }
+    selectProject = function(project){
+        $(".selected_column").removeClass("selected_column");
+        $(`[data-project_id=${project.id}]`).addClass("selected_column");
+        displayTaskOfSelectProject(project);
+        return true;
+    }
 
     //タスク一覧
     get tasks(){ return this.#tasks; }
@@ -136,7 +111,7 @@ class ViewModel {
 class Project {
     #id = -1;
     #name = '';
-    #color = 'black';
+    #color = ko.observable('#777777');
     constructor(id, name, color){
         this.id = id;
         this.name = name;
@@ -153,7 +128,7 @@ class Project {
 
     // 色
     get color(){ return this.#color; }
-    set color(value){ this.#color = value; }
+    set color(value){ this.#color(value); }
 }
 
 //タスククラス(モデル)
@@ -211,8 +186,7 @@ class Task{
 
 //ビューモデル
 const vm = new ViewModel();
-vm.addProjectHandler = appendProjectDiv;
-vm.removeProjectHandler = removeProjectDiv;
+ko.applyBindings(vm);
 vm.addTaskHandler = appendTaskDiv;
 vm.removeTaskHandler = removeTaskDiv;
 
@@ -286,17 +260,6 @@ window.onload = function(){
         changeSound();
     });
 
-    //プロジェクト選択機能初期化
-    let projectElements = $(".main-column-projects-project");
-    projectElements.each(function(i, elem){
-        $(elem).on("click",function(){
-            $(".selected_column").removeClass("selected_column");
-            $(elem).addClass("selected_column");
-            let select_project_id = $(elem).data("project_id");
-            //タスク表示のリセット
-            displayTaskOfSelectProject(select_project_id);
-        })
-    })
     //プロジェクトの一覧初期表示
     initProjects();
     //日付入力欄に初期値（今日）を入力
@@ -349,7 +312,7 @@ function changeSound(){
  * @function 選択したプロジェクトのタスクを取得し、画面更新
  * @param project_id:選択したプロジェクトのid
  */
-function displayTaskOfSelectProject(project_id){
+function displayTaskOfSelectProject(project){
 
     //タスクを追加するフォームを表示する
     if($(".main-todo-body-tasks-task").hasClass("hidden")){
@@ -363,7 +326,7 @@ function displayTaskOfSelectProject(project_id){
         {
             type: "POST",
             data:{
-                project_id: project_id,
+                project_id: project.id,
                 todo: "selectTasks"
             },
             dataType: "json"
@@ -416,11 +379,10 @@ function appendTaskDiv(task){
         clone.querySelector('.main-todo-body_tasks').classList.add('hidden');
     }
     let color = '#777777';
-    for(project of vm.projects){
-        if(project.id != task.projectId) continue;
-        color = project.color;
-        break;
-    }
+    vm.projects().forEach(function(v, i){
+        if(v.id != task.projectId) return;
+        color = v.color();
+    });
     clone.querySelector(".task_project_color").setAttribute("style", `background-color: ${color};`);
     if(showCheck){
         clone.querySelector('.check_task').classList.add(task.isCompleted ? 'check-complete_task' : 'check-incomplete_task');
@@ -698,45 +660,6 @@ function inputProject(text){
     });
 }
 
-//プロジェクトの末尾に追加
-function appendProjectDiv(project)
-{
-    //新しく追加する要素の用意
-    let template = document.querySelector('#project');
-    let clone = template.content.cloneNode(true);
-    clone.querySelector('.main-column-projects-project').setAttribute('data-project_id', project.id);
-    let cpId = `cp-project_id_${project.id}`;
-    clone.querySelector('.label_project').htmlFor = cpId;
-    clone.querySelector('.color-picker').id = cpId;
-    clone.querySelector('.color-picker').value = project.color;
-    clone.querySelector('.color-picker').setAttribute('project_id', project.id);
-    clone.querySelector('.color-picker').addEventListener('change', function(){
-        changeProjectColor(this.getAttribute('project_id'), this.value);
-    });
-    clone.querySelector('.label_project_icon').style.color = project.color;
-    clone.querySelector('.name').textContent = project.name;
-    $("#projects").append(clone);
-
-    //追加プロジェクトの削除ボタン有効化
-    let newProject = $(".main-column-projects div:last");
-    enableProjectDeleteButton(newProject);
-    //追加プロジェクトの選択を有効化
-    newProject.on("click", function(){
-        $(".selected_column").removeClass("selected_column");
-        newProject.addClass("selected_column");
-        //追加プロジェクト選択時には、該当のタスクを表示する
-        let select_project_id = $(this).data("project_id");
-        displayTaskOfSelectProject(select_project_id);
-    });
-}
-
-//プロジェクトを除去
-function removeProjectDiv(project)
-{
-    let deleteElement = $(`[data-project_id=${project.id}]`);
-    deleteElement.remove();
-}
-
 //プロジェクトの削除ボタン有効化
 function enableProjectDeleteButton(element){
     let enableButton = element.find(".delete_project_button");
@@ -747,12 +670,13 @@ function enableProjectDeleteButton(element){
 }
 
 //プロジェクトの色変更
-function changeProjectColor(id, color){
+function changeProjectColor(project, event){
+    const color = event.target.value;
     $.ajax("./post.php",
         {
             type: "POST",
             data:{
-                project_id: id,
+                project_id: project.id,
                 color: color,
                 todo: "updateProjectColor"
             },
@@ -763,18 +687,8 @@ function changeProjectColor(id, color){
             alert("プロジェクト色変更できませんでした");
             return;
         }
-        for(project of vm.projects){
-            if(project.id != id) continue;
-            project.color = color;
-            const projectDiv = $(`[data-project_id=${project.id}]`);
-            const icons = projectDiv.find('.label_project_icon');
-            for(const icon of icons){
-                icon.style.color = project.color;
-            }
-            break;
-        }
         for(task of vm.tasks){
-            if(task.projectId != id) continue;
+            if(task.projectId != project.id) continue;
             const taskDiv = $(`[data-task_id=${task.id}]`);
             const stickies = taskDiv.find('.task_project_color');
             for(const sticky of stickies){
@@ -787,14 +701,14 @@ function changeProjectColor(id, color){
 }
 
 //プロジェクトの削除
-function deleteProject(id){
+function deleteProject(project){
     //確認ダイアログ
     if(window.confirm("プロジェクトを削除してもよろしいですか？")){
         $.ajax("./post.php",
             {
                 type: "POST",
                 data:{
-                    project_id: id,
+                    project_id: project.id,
                     todo: "deleteProject"
                 },
                 dataType: "json"
@@ -811,11 +725,7 @@ function deleteProject(id){
                 }
             }
             //削除したプロジェクトを画面表示から消す
-            for(let i=0; i<vm.projects.length; i++){
-                if(vm.projects[i].id != data) continue;
-                vm.projects.splice(i, 1);
-                break;
-            }
+            vm.projects.remove(project);
             //削除プロジェクトが選択中だった場合、タスク画面表示を変更する
             if(isDeletedProjectWasSelected){
                 vm.tasks.splice(0, vm.tasks.length);
