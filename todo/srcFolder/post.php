@@ -29,58 +29,6 @@ switch ($_POST['todo']) {
     case "updateTaskStatus":
         updateTaskStatus();
         break;
-    case "selectTaskFromOneDay":
-        selectTaskFromOneDay();
-        break;
-    case "selectTaskFromThatDay":
-        selectTaskFromThatDay();
-        break;
-    case "selectCompletedTasks":
-        selectCompletedTasks();
-        break;
-    case "selectTaskUntilYesterday":
-        selectTaskUntilYesterday();
-        break;
-}
-
-//期限超過したタスクを表示
-function selectTaskUntilYesterday(){
-    $date = $_POST['finish_date'];
-    //データの取得
-    $data = SQL::selectTaskUntilYesterday($date);
-    header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($data);
-    exit;
-}
-
-//完了済みのタスクを取得
-function selectCompletedTasks(){
-    $data = SQL::selectCompletedTasks();
-    header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($data);
-    exit;
-}
-
-//明後日以降のタスクを取得
-function selectTaskFromThatDay(){
-    $date = $_POST['finish_date'];
-    //データの取得
-    $data = SQL::selectTaskFromThatDay($date);
-
-    header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($data);
-    exit;
-}
-
-//日付を指定して、タスクを取得
-function selectTaskFromOneDay(){
-    $date = $_POST['finish_date'];
-    //データの取得
-    $data = SQL::selectTaskFromOneDay($date);
-
-    header("Content-type: application/json; charset=UTF-8");
-    echo json_encode($data);
-    exit;
 }
 
 //タスクの完了状態変更

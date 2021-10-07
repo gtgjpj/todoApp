@@ -474,41 +474,49 @@ function removeTaskDiv(task){
  * 
 */
  function displayTasksByDayColumn(day){
-    let today = new Date();
-    let finishDate;
-    let finishDateTimestamp;
-    let todo;
+    const todo = "selectTasks";
+    let dateFrom = null;
+    let dateTo = null;
+    let status = null;
     switch(day){
         case "today":
-            finishDate = today;
-            todo = "selectTaskFromOneDay";
+            dateFrom = new Date();
+            dateTo = dateFrom;
             break;
         case "tomorrow":
-            finishDateTimestamp = today.getTime() + (1000 * 60 * 60 * 24 * 1);
-            finishDate = new Date(finishDateTimestamp);
-            todo = "selectTaskFromOneDay";
+            dateFromTimestamp = new Date().getTime() + (1000 * 60 * 60 * 24 * 1);
+            dateFrom = new Date(dateFromTimestamp);
+            dateTo = dateFrom;
             break;
         case "later":
-            finishDateTimestamp = today.getTime() + (1000 * 60 * 60 * 24 * 2);
-            finishDate = new Date(finishDateTimestamp);
-            todo = "selectTaskFromThatDay";
+            dateFromTimestamp = new Date().getTime() + (1000 * 60 * 60 * 24 * 2);
+            dateFrom = new Date(dateFromTimestamp);
             break;
         case "incomplete":
-            finishDateTimestamp = today.getTime() - (1000 * 60 * 60 * 24 * 1);
-            finishDate = new Date(finishDateTimestamp);
-            todo = "selectTaskUntilYesterday";
+            dateToTimestamp = new Date().getTime() - (1000 * 60 * 60 * 24 * 1);
+            dateTo = new Date(dateToTimestamp);
             break;
-
+        case "completed":
+            status = "0";
+            break;
     }
-    let searchDate = finishDate.getFullYear() + "-" + (finishDate.getMonth() + 1) + "-" + finishDate.getDate();
-    //searchDate = new Date(finishDate.getFullYear(), finishDate.getMonth(), finishDate.getDate());
+    let dateFromStr = null;
+    if(dateFrom != null){
+        dateFromStr = dateFrom.getFullYear() + "-" + (dateFrom.getMonth() + 1) + "-" + dateFrom.getDate();
+    }
+    let dateToStr = null;
+    if(dateTo != null){
+        dateToStr = dateTo.getFullYear() + "-" + (dateTo.getMonth() + 1) + "-" + dateTo.getDate();
+    }
 
     //Ajax
     $.ajax("./post.php",
             {
                 type: "POST",
                 data:{
-                    finish_date: searchDate,
+                    date_from: dateFromStr,
+                    date_to: dateToStr,
+                    status: status,
                     todo: todo
                 },
                 dataType: "json"
@@ -922,21 +930,7 @@ function clickCompleted(){
     //タスク画面で、選択中のプロジェクトタイトルを変更
     let selectedColumnName = "完了済み";
     $("#todo_title").text(selectedColumnName);
-
-    //Ajax
-    $.ajax("./post.php",
-            {
-                type: "POST",
-                data:{
-                    todo: "selectCompletedTasks"
-                },
-                dataType: "json"
-            }
-        ).done(function(data){
-            displayTasks(data);
-        }).fail(function(XMLHttpRequest, status, e){
-            alert("タスクを表示できませんでした\n" + e);
-        });
+    displayTasksByDayColumn("completed");
 }
 
 //未完了タスクの表示
