@@ -24,22 +24,22 @@
     }
 
     it('test project', function(){
-        let project = new Project(1, 'テストProject', '#777');
+        let project = new Project(1, 'テストProject', '#777777');
         assert(project.id === 1);
         assert(project.name === 'テストProject');
-        assert(project.color === '#777');
+        assert(project.color() === '#777777');
     });
 
     it('test viewmodel projects', function(){
         let viewModel = new ViewModel();
         assert(viewModel.projects.length === 0);
 
-        let project = new Project(1, 'テストProject', '#777');
+        let project = new Project(1, 'テストProject', '#777777');
         viewModel.projects.push(project);
-        assert(viewModel.projects.length === 1);
+        assert(viewModel.projects().length === 1);
 
-        viewModel.projects.splice(0);
-        assert(viewModel.projects.length === 0);
+        viewModel.projects.removeAll();
+        assert(viewModel.projects().length === 0);
     });
 
     it('test task', function(){
