@@ -66,11 +66,11 @@
                 <h2 id="todo_title">今日</h2>
                 <div class="main-todo-result">
                     <div class="main-todo-result-incomplete">
-                        <h3 id="incomplete_task_count">0</h3>
+                        <h3 id="incomplete_task_count" data-bind="text: incompleteTasks().length"></h3>
                         <p>未完了</p>
                     </div>
                     <div class="main-todo-result-complete">
-                        <h3 id="complete_task_count">0</h3>
+                        <h3 id="complete_task_count" data-bind="text: completedTasks().length"></h3>
                         <p>完了済み</p>
                     </div>
                 </div>
@@ -82,12 +82,26 @@
                             <input id="input_date" class="main-todo-body-tasks-task-date" type="date">
                         </div>
                     </div>
-                    <div id="incomplete_tasks">
+                    <div id="incomplete_tasks" data-bind="foreach: incompleteTasks">
+                        <div class="main-todo-body_tasks main-todo-body-incomplete_tasks">
+                            <div class="task_project_color darkmode-ignore" data-bind="style: { 'background-color': project.color }">&nbsp;</div>
+                            <i class="material-icons check_task check-incomplete_task" data-bind="click: enableTaskStatusChangeButton">crop_square</i>
+                            <p class="task_value task_value_incomplete" data-bind="text: value"></p>
+                            <p class="task_date task_date_incomplete" data-bind="text: `期限:${completetionDate}`, css: { red: isExpired }"></p>
+                            <i class="material-icons delete_task delete_incomplete_task" data-bind="click: enableTaskDeleteButton">delete_forever</i>
+                        </div>
                     </div>
-                    <div id="complete_task_button" class="main-todo-body-complete_task_button">
-                        <p>完了済みのタスクを表示</p>
+                    <div id="complete_task_button" class="main-todo-body-complete_task_button" data-bind="click: openComplete">
+                        <p data-bind="text: $root.openCompleteTaskFlag() == 0 ? '完了済みのタスクを表示' : '完了済みのタスクを非表示'">完了済みのタスクを表示</p>
                     </div>
-                    <div id="complete_tasks">
+                    <div id="complete_tasks" data-bind="foreach: completedTasks">
+                        <div class="main-todo-body_tasks main-todo-body-complete_tasks" data-bind="css: { hidden: $root.openCompleteTaskFlag() == 0 }">
+                            <div class="task_project_color darkmode-ignore" data-bind="style: { 'background-color': project.color }">&nbsp;</div>
+                            <i class="material-icons check_task check-complete_task" data-bind="click: enableTaskStatusChangeButton">done</i>
+                            <p class="task_value task_value_complete" data-bind="text: value"></p>
+                            <p class="task_date task_date_complete" data-bind="text: `期限:${completetionDate}`, css: { red: isExpired }"></p>
+                            <i class="material-icons delete_task delete_complete_task" data-bind="click: enableTaskDeleteButton">delete_forever</i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,16 +110,6 @@
     <div class="link">
         <a href="https://maou.audio/" target="_blank" rel="noopener noreferrer">効果音：魔王魂</a>
     </div>
-
-    <template id="task">
-        <div class="main-todo-body_tasks">
-            <div class="task_project_color darkmode-ignore">&nbsp;</div>
-            <i class="material-icons check_task"></i>
-            <p class="task_value"></p>
-            <p class="task_date"></p>
-            <i class="material-icons delete_task">delete_forever</i>
-        </div>
-    </template>
 
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
