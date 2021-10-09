@@ -339,6 +339,10 @@ function displayTasks(tasksDataArray){
             vm.incompleteTasks.push(task);
         }
     }
+    const showCheck = !$(".selected_column").hasClass("main-column-completed");
+    if(!showCheck){
+        $(".check_task").remove();
+    }
 }
 
 /**
