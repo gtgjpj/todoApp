@@ -467,8 +467,20 @@ function enableTaskStatusChangeButton(task){
             dataType: "json"
         }
     ).done(function(tasksDataArray){
-        //返ってきたタスク処理する
-        displayTasks(tasksDataArray);
+        if($(".selected_column").hasClass("main-column-today")){
+            clickToday();
+        }else if($(".selected_column").hasClass("main-column-tomorrow")){
+            clickTomorrow();
+        }else if($(".selected_column").hasClass("main-column-later")){
+            clickLater();
+        }else if($(".selected_column").hasClass("main-column-incomplete")){
+            clickIncomplete();
+        }else if($(".selected_column").hasClass("main-column-completed")){
+            clickCompleted();
+        }else{
+            //返ってきたタスク処理する
+            displayTasks(tasksDataArray);
+        }
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクの状態を変更できません\n" + e);
     });
