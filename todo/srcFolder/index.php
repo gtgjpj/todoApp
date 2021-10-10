@@ -19,11 +19,13 @@
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
         </div>
         <div class="main">
+            <!-- //TODO完了済み以外の部分に未完了タスク数を表示させる -->
             <div class="main-column">
                 <div id="today_task" class="main-column-today column_box selected_column">
                     <i class="material-icons icon-column">wb_sunny</i>
                     <p>今日</p>
-                    <p class="counts"></p>
+                    <p class="counts" data-bind="text: allIncompleteTasks"></p>
+                    <!-- <p class="counts" data-bind="text: countOfTodayTasks"></p> -->
                 </div>
                 <div id="tomorrow_task" class="main-column-tomorrow column_box">
                     <i class="material-icons icon-column">wb_twilight</i>

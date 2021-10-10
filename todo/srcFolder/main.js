@@ -57,6 +57,8 @@ class ViewModel {
     #completedTasks = ko.observableArray();
     //完了済みタスクの表示フラグ(0:非表示)
     #openCompleteTaskFlag = ko.observable(0);
+    //TODO現状実際のタスク数が反映されていない
+    #allIncompleteTasks = ko.observable(0);
     constructor() {
     }
 
@@ -84,6 +86,28 @@ class ViewModel {
     //完了済みタスクの表示フラグ
     get openCompleteTaskFlag() { return this.#openCompleteTaskFlag; }
     set openCompleteTaskFlag(value) { this.#openCompleteTaskFlag(value); }
+
+    //全体の未完了タスク数
+    get allIncompleteTasks(){return this.#allIncompleteTasks;}
+    set allIncompleteTasks(value) {this.#allIncompleteTasks(value);}
+}
+
+//左上メニュークラス(モデル)
+class incompleteTasksCount{
+    #menu = "";
+    #count = 0;
+    constructor(menu, count){
+        this.menu = menu;
+        this.count = count;
+    }
+
+    //表示する未完了タスク数に対応するメニュー
+    get menu(){ return this.#menu;}
+    set menu(value){ this.#menu = value;}
+
+    //未完了タスク数
+    get count(){return this.#count;}
+    set count(value){this.#count = value;}
 }
 
 //プロジェクトクラス(モデル)
@@ -229,6 +253,8 @@ window.onload = function(){
         changeSound();
     });
 
+    //未完了タスク数の表示
+    displayIncompleteTasks();
     //プロジェクトの一覧初期表示
     initProjects();
     //日付入力欄に初期値（今日）を入力
@@ -604,6 +630,15 @@ function deleteProject(project){
             alert("削除できませんでした" + e);
         });
     }
+}
+
+//TODO実際の未完了タスク数を取得して反映させる
+//左上メニューの値を表示
+function displayIncompleteTasks(){
+    let menu = "today";
+    let count = 2;
+    // vm.allIncompleteTasks = new incompleteTasksCount(menu, count);
+    vm.allIncompleteTasks = count;
 }
 
 //タスク入力欄選択中にEnter
