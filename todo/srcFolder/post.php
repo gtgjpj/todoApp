@@ -29,6 +29,9 @@ switch ($_POST['todo']) {
     case "updateTaskStatus":
         updateTaskStatus();
         break;
+    case "selectIncompleteTasksCount":
+        selectIncompleteTasksCount();
+        break;
 }
 
 //タスクの完了状態変更
@@ -140,6 +143,24 @@ function insertTaskToProject()
     SQL::insertTaskToProject(DB::h($_POST['project_id']), DB::h($_POST['task_value']), DB::h($_POST['completetion_date']));
     //タスク追加後のプロジェクト内のタスク取得
     $data = SQL::selectTasks($_POST['project_id'], null, null, null);
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($data);
+    exit;
+}
+
+//今日、明日、それ以降、期限超過の未完了タスク数を取得して返す
+function selectIncompleteTasksCount()
+{
+    $todayDate = $_POST["today"];
+    $tomorrowDate = $_POST["tomorrow"];
+    $laterDate = $_POST["later"];
+    
+    $todayCount = SQL::countIncompleteTasks($todayDate, $todayDate);
+    $tomorrowCount = SQL::countIncompleteTasks($tomorrowDate, $tomorrowDate);
+    $laterCount = SQL::countIncompleteTasks($laterDate, null);
+    $overCount = SQL::countIncompleteTasks(null, $todayDate);
+    
+    $data = array($todayCount, $tomorrowCount, $laterCount, $overCount);
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;

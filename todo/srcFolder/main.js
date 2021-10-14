@@ -58,7 +58,10 @@ class ViewModel {
     //完了済みタスクの表示フラグ(0:非表示)
     #openCompleteTaskFlag = ko.observable(0);
     //TODO現状実際のタスク数が反映されていない
-    #allIncompleteTasks = ko.observable(0);
+    #todayIncompleteTasks = ko.observable(0);
+    #tomorrowIncompleteTasks = ko.observable(0);
+    #laterIncompleteTasks = ko.observable(0);
+    #overIncompleteTasks = ko.observable(0);
     constructor() {
     }
 
@@ -88,27 +91,33 @@ class ViewModel {
     set openCompleteTaskFlag(value) { this.#openCompleteTaskFlag(value); }
 
     //全体の未完了タスク数
-    get allIncompleteTasks(){return this.#allIncompleteTasks;}
-    set allIncompleteTasks(value) {this.#allIncompleteTasks(value);}
+    get todayIncompleteTasks(){return this.#todayIncompleteTasks;}
+    set todayIncompleteTasks(value) {this.#todayIncompleteTasks(value);}
+    get tomorrowIncompleteTasks(){return this.#tomorrowIncompleteTasks;}
+    set tomorrowIncompleteTasks(value) {this.#tomorrowIncompleteTasks(value);}
+    get laterIncompleteTasks(){return this.#laterIncompleteTasks;}
+    set laterIncompleteTasks(value) {this.#laterIncompleteTasks(value);}
+    get overIncompleteTasks(){return this.#overIncompleteTasks;}
+    set overIncompleteTasks(value) {this.#overIncompleteTasks(value);}
 }
 
 //左上メニュークラス(モデル)
-class incompleteTasksCount{
-    #menu = "";
-    #count = 0;
-    constructor(menu, count){
-        this.menu = menu;
-        this.count = count;
-    }
+// class incompleteTasksCount{
+//     #menu = "";
+//     #count = 0;
+//     constructor(menu, count){
+//         this.menu = menu;
+//         this.count = count;
+//     }
 
-    //表示する未完了タスク数に対応するメニュー
-    get menu(){ return this.#menu;}
-    set menu(value){ this.#menu = value;}
+//     //表示する未完了タスク数に対応するメニュー
+//     get menu(){ return this.#menu;}
+//     set menu(value){ this.#menu = value;}
 
-    //未完了タスク数
-    get count(){return this.#count;}
-    set count(value){this.#count = value;}
-}
+//     //未完了タスク数
+//     get count(){return this.#count;}
+//     set count(value){this.#count = value;}
+// }
 
 //プロジェクトクラス(モデル)
 class Project {
@@ -635,10 +644,36 @@ function deleteProject(project){
 //TODO実際の未完了タスク数を取得して反映させる
 //左上メニューの値を表示
 function displayIncompleteTasks(){
-    let menu = "today";
-    let count = 2;
-    // vm.allIncompleteTasks = new incompleteTasksCount(menu, count);
-    vm.allIncompleteTasks = count;
+    //今日、明日、明後日の日付を取得する
+    let dateToday = new Date();
+    let timestampTomorrow = new Date().getTime() + (1000 * 60 * 60 * 24 * 1);
+    let dateTomorrow = new Date(timestampTomorrow);
+    let timestampLater = new Date().getTime() + (1000 * 60 * 60 * 24 * 2);
+    let dateLater = new Date(timestampLater);
+    
+    let todayStr = dateToday.getFullYear() + "-" + (dateToday.getMonth() + 1) + "-" + dateToday.getDate();
+    let tomorrowStr = dateTomorrow.getFullYear() + "-" + (dateTomorrow.getMonth() + 1) + "-" + dateTomorrow.getDate();
+    let laterStr = dateLater.getFullYear() + "-" + (dateLater.getMonth() + 1) + "-" + dateLater.getDate();
+    //ajaxで今日、明日、それ以降、期限超過タスク数をもってくる
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                today: todayStr,
+                tomorrow: tomorrowStr,
+                later: laterStr, 
+                todo: "selectIncompleteTasksCount"
+            },
+            dataType: "json"
+        }
+    ).done(function(incompleteTasksCount){
+        vm.todayIncompleteTasks = incompleteTasksCount[0]["count"];
+        vm.tomorrowIncompleteTasks = incompleteTasksCount[1]["count"];
+        vm.laterIncompleteTasks = incompleteTasksCount[2]["count"];
+        vm.overIncompleteTasks = incompleteTasksCount[3]["count"];
+    }).fail(function(e){
+        alert("未完了タスク数を表示できません\n" + e);
+    });
 }
 
 //タスク入力欄選択中にEnter
