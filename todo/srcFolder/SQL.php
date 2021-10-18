@@ -89,22 +89,34 @@ EOF;
         $pdo = null;
     }
 
-    //プロジェクトの色変更
-    public static function updateProjectColor($project_id, $color)
+    //プロジェクト内容更新
+    public static function updateProject($project_id, $project_name, $color)
     {
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sqlSet = "";
+            $array = array(':project_id' => $project_id);
+            if($project_name != null && strlen($project_name) > 0){
+                if(strlen($sqlSet) > 0) $sqlSet .= ",";
+                $sqlSet .= " `project_name` = :project_name ";
+                $array[":project_name"] = $project_name;
+            }
+            if($color != null && strlen($color) > 0){
+                if(strlen($sqlSet) > 0) $sqlSet .= ",";
+                $sqlSet .= " `color` = :color ";
+                $array[":color"] = $color;
+            }
             $sql = <<< EOF
 UPDATE
  `project`
 SET
- `color` = :color
+{$sqlSet}
 WHERE
  `project_id` = :project_id
 EOF;
             $stmt = $pdo->prepare($sql);
-            $stmt->execute(array(':project_id' => $project_id, ':color' => $color));
+            $stmt->execute($array);
         } catch (PDOException $e) {
             die();
         }

@@ -20,39 +20,22 @@
         </div>
         <div class="main">
             <div class="main-column">
-                <div id="today_task" class="main-column-today column_box selected_column">
-                    <i class="material-icons icon-column">wb_sunny</i>
-                    <p>今日</p>
-                    <p class="counts"></p>
-                </div>
-                <div id="tomorrow_task" class="main-column-tomorrow column_box">
-                    <i class="material-icons icon-column">wb_twilight</i>
-                    <p>明日</p>
-                    <p class="counts"></p>
-                </div>
-                <div id="later_task" class="main-column-later column_box">
-                    <i class="material-icons icon-column">date_range</i>
-                    <p>それ以降</p>
-                    <p class="counts"></p>
-                </div>
-                <div id=completed_task class="main-column-completed column_box">
-                    <i class="material-icons icon-column">check_circle_outline</i>
-                    <p>完了済み</p>
-                    <p class="counts"></p>
-                </div>
-                <div id=incomplete_task class="main-column-incomplete column_box">
-                    <i class="material-icons icon-column">new_releases</i>
-                    <p>期限超過</p>
-                    <p class="counts"></p>
+                <div data-bind="foreach: columns">
+                    <div class="column_box" data-bind="css: { selected_column: $root.selectedColumn() === $data }, click: clickColumn">
+                        <i class="material-icons icon-column" data-bind="text: icon, style: { color: color }"></i>
+                        <p data-bind="text: name"></p>
+                        <p class="counts"></p>
+                    </div>
                 </div>
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects" data-bind="foreach: projects">
-                    <div class="main-column-projects-project" data-bind="click: $root.selectProject, attr: { 'data-project_id': id }">
+                    <div class="main-column-projects-project" data-bind="click: displayTaskOfSelectProject, css: { selected_column: $root.selectedColumn() === $data }">
                         <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }">
                             <i class="material-icons label_project_icon darkmode-ignore" data-bind="style: { color: color }">label</i>
                         </label>
                         <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
-                        <p class="name" data-bind="text: name"></p>
+                        <p class="name" data-bind="text: name, click: clickProjectName, hidden: $root.renameProject() === $data"></p>
+                        <input type="text" class="rename" maxlength="30" data-bind="visible: $root.renameProject() === $data, hasfocus: $root.renameProject() === $data, event: { keydown: keydownRenameProject, blur: blurProjectName }"/>
                         <i class="material-icons delete_project_button" data-bind="click: deleteProject, clickBubble: false">delete_forever</i>
                     </div>
                 </div>
@@ -63,7 +46,7 @@
                 </div>
             </div>
             <div class="main-todo">
-                <h2 id="todo_title">今日</h2>
+                <h2 id="todo_title" data-bind="text: $root.selectedColumn() !== null ? $root.selectedColumn().name : 'プロジェクト未選択'"></h2>
                 <div class="main-todo-result">
                     <div class="main-todo-result-incomplete">
                         <h3 id="incomplete_task_count" data-bind="text: incompleteTasks().length"></h3>
@@ -76,7 +59,7 @@
                 </div>
                 <div class="main-todo-body">
                     <div class="main-todo-body-tasks">
-                        <div class="main-todo-body-tasks-task hidden">
+                        <div class="main-todo-body-tasks-task" data-bind="visible: $root.selectedColumn() instanceof Project">
                             <i class="material-icons">add</i>
                             <input id="input_task" class="main-todo-body-tasks-task-text" type="text" maxlength="30" placeholder="ここにタスクを入力してEnter">
                             <input id="input_date" class="main-todo-body-tasks-task-date" type="date">
@@ -85,10 +68,10 @@
                     <div id="incomplete_tasks" data-bind="foreach: incompleteTasks">
                         <div class="main-todo-body_tasks main-todo-body-incomplete_tasks">
                             <div class="task_project_color darkmode-ignore" data-bind="style: { 'background-color': project.color }">&nbsp;</div>
-                            <i class="material-icons check_task check-incomplete_task" data-bind="click: enableTaskStatusChangeButton">crop_square</i>
+                            <i class="material-icons check_task check-incomplete_task" data-bind="click: clickTaskStatus, hidden: $root.selectedColumn() === $root.columns[COLUMN_TYPE.COMPLETED]">crop_square</i>
                             <p class="task_value task_value_incomplete" data-bind="text: value"></p>
                             <p class="task_date task_date_incomplete" data-bind="text: `期限:${completetionDate}`, css: { red: isExpired }"></p>
-                            <i class="material-icons delete_task delete_incomplete_task" data-bind="click: enableTaskDeleteButton">delete_forever</i>
+                            <i class="material-icons delete_task delete_incomplete_task" data-bind="click: clickTaskDelete">delete_forever</i>
                         </div>
                     </div>
                     <div id="complete_task_button" class="main-todo-body-complete_task_button" data-bind="click: openComplete">
@@ -97,10 +80,10 @@
                     <div id="complete_tasks" data-bind="foreach: completedTasks">
                         <div class="main-todo-body_tasks main-todo-body-complete_tasks" data-bind="css: { hidden: $root.openCompleteTaskFlag() == 0 }">
                             <div class="task_project_color darkmode-ignore" data-bind="style: { 'background-color': project.color }">&nbsp;</div>
-                            <i class="material-icons check_task check-complete_task" data-bind="click: enableTaskStatusChangeButton">done</i>
+                            <i class="material-icons check_task check-complete_task" data-bind="click: clickTaskStatus, hidden: $root.selectedColumn() === $root.columns[COLUMN_TYPE.COMPLETED]">done</i>
                             <p class="task_value task_value_complete" data-bind="text: value"></p>
                             <p class="task_date task_date_complete" data-bind="text: `期限:${completetionDate}`, css: { red: isExpired }"></p>
-                            <i class="material-icons delete_task delete_complete_task" data-bind="click: enableTaskDeleteButton">delete_forever</i>
+                            <i class="material-icons delete_task delete_complete_task" data-bind="click: clickTaskDelete">delete_forever</i>
                         </div>
                     </div>
                 </div>
