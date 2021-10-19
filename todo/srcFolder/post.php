@@ -11,8 +11,8 @@ switch ($_POST['todo']) {
     case "deleteProject":
         deleteProject();
         break;
-    case "updateProjectColor":
-        updateProjectColor();
+    case "updateProject":
+        updateProject();
         break;
     case "insertTaskToProject":
         insertTaskToProject();
@@ -55,16 +55,10 @@ function updateTaskStatus()
 //タスクの削除
 function deleteTask()
 {
-    $project_id = $_POST['project_id'];
     $task_id = $_POST['task_id'];
     //データの削除
-    SQL::deleteTask(DB::h($task_id));
+    $data = SQL::deleteTask($task_id);
     //更新後のタスクの取得
-    if($project_id === null){
-        $data = "notProject";
-    }else{
-        $data = SQL::selectTasks($project_id, null, null, null);
-    }
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
     exit;
@@ -120,13 +114,14 @@ function deleteProject()
     exit;
 }
 
-//プロジェクトの色変更
-function updateProjectColor()
+//プロジェクト内容更新
+function updateProject()
 {
     $project_id = $_POST['project_id'];
-    $color = $_POST['color'];
+    $project_name = isset($_POST['project_name']) ? $_POST['project_name'] : null;
+    $color = isset($_POST['color']) ? $_POST['color'] : null;
     //データの更新
-    $count = SQL::updateProjectColor($project_id, $color);
+    $count = SQL::updateProject($project_id, $project_name, $color);
 
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($count);
