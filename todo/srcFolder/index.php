@@ -35,7 +35,7 @@
                         </label>
                         <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
                         <p class="name" data-bind="text: name, click: clickProjectName, hidden: $root.renameProject() === $data"></p>
-                        <input type="text" class="rename" maxlength="30" data-bind="visible: $root.renameProject() === $data, hasfocus: $root.renameProject() === $data, event: { keydown: keydownRenameProject, blur: blurProjectName }"/>
+                        <input type="text" class="rename" maxlength="30" data-bind="visible: $root.renameProject() === $data, hasfocus: $root.renameProject() === $data, event: { keydown: keydownRenameProject, blur: blurProjectName }" placeholder="入力してEnter"/>
                         <i class="material-icons delete_project_button" data-bind="click: deleteProject, clickBubble: false">delete_forever</i>
                     </div>
                 </div>
