@@ -508,22 +508,12 @@ function deleteProject(project){
                 dataType: "json"
             }
         ).done(function(data){
-            //削除プロジェクトが選択中か確認する
-            let selectedColumn = $(".selected_column");
-            let selectedColumnId;
-            let isDeletedProjectWasSelected = false;
-            if(selectedColumn.hasClass("main-column-projects-project")){
-                selectedColumnId = String(selectedColumn.data("project_id"));
-                if(data === selectedColumnId){
-                    isDeletedProjectWasSelected = true;
-                }
-            }
             //削除したプロジェクトを画面表示から消す
             vm.projects.remove(project);
             //削除プロジェクトが選択中だった場合、タスク画面表示を変更する
-            if(isDeletedProjectWasSelected){
-                vm.incompleteTasks.removeAll();
-                vm.completedTasks.removeAll();
+            vm.incompleteTasks.remove(function(item){ return item.project === project } );
+            vm.completedTasks.remove(function(item){ return item.project === project } );
+            if(vm.selectedColumn() === project){
                 vm.selectedColumn(null);
             }
         }).fail(function(XMLHttpRequest, status, e){
