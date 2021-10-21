@@ -90,6 +90,7 @@ class Project extends AbstractColumn {
 class Column extends AbstractColumn {
     icon = '';
     type = '';
+    countIncompleteTasks = ko.observable();
     constructor(name, color, icon, type){
         super(name, color);
         this.icon = icon;
