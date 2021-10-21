@@ -24,7 +24,7 @@
                     <div class="column_box" data-bind="css: { selected_column: $root.selectedColumn() === $data }, click: clickColumn">
                         <i class="material-icons icon-column" data-bind="text: icon, style: { color: color }"></i>
                         <p data-bind="text: name"></p>
-                        <p class="counts"></p>
+                        <p class="counts" data-bind="text: countIncompleteTasks"></p>
                     </div>
                 </div>
                 <hr class="hr_gray">
