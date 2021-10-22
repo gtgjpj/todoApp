@@ -13,9 +13,9 @@ i {
 }
 
 body {
-  width: 800px;
   background-color: #eee;
   border: solid 2px #777;
+  box-sizing: border-box;
 }
 
 .header {
@@ -28,7 +28,6 @@ body {
 }
 .main {
   display: flex;
-  height: 450px;
   flex-direction: row;
 }
 

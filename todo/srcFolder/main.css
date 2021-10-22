@@ -48,6 +48,10 @@
   margin-right: 20px;
 }
 
+.main-column {
+  border-right: solid 2px;
+}
+
 .main-column-projects {
   height: 210px;
   overflow-y: scroll;
@@ -82,12 +86,11 @@
   margin: 20px 25px;
 }
 .main-todo {
-  border-left: solid 3px;
+  border-left: solid 1px;
   background-color: #eee;
 }
 
 .main-todo-result {
-  margin-left: 30px;
   width: 500px;
   height: 50px;
   background-color: #fff;
@@ -110,13 +113,7 @@
 .task_project_color {
   height: 30px;
 }
-.task_value_incomplete,
-.task_value_complete {
-  width: 280px;
-}
 .main-todo-body-tasks-task {
-  margin-left: 30px;
-  width: 500px;
   height: 40px;
   background-color: #fff;
   align-items: center;
@@ -129,13 +126,11 @@
 }
 .main-todo-body-tasks-task-text {
   height: 30px;
-  width: 300px;
   border: none;
 }
 .main-todo-body-tasks-task-date {
   color: #777;
   height: 26px;
-  width: 140px;
   margin: 0 10px;
   border: none;
 }
@@ -150,9 +145,7 @@
 .main-todo-body-incomplete_tasks {
   display: flex;
   align-items: center;
-  width: 500px;
   background-color: #fff;
-  margin-left: 30px;
   min-height: 30px;
   max-height: 70px;
   margin-bottom: 10px;
@@ -180,10 +173,8 @@
 }
 
 .link {
-  width: 800px;
-}
-.link a {
-  margin-left: 670px;
+  width: 100%;
+  text-align: right;
 }
 
 .label_project {
