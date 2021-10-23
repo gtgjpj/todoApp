@@ -225,6 +225,8 @@ window.onload = function(){
         changeSound();
     });
 
+    //未完了タスク数の表示
+    displayIncompleteTasks();
     //プロジェクトの一覧初期表示
     initProjects();
     //日付入力欄に初期値（今日）を入力
@@ -340,7 +342,7 @@ function displayTasks(tasksDataArray){
  * @param day :検索表示する日付 
  * 
 */
- function displayTasksByDayColumn(day){
+function displayTasksByDayColumn(day){
     const todo = "selectTasks";
     let dateFrom = null;
     let dateTo = null;
@@ -401,7 +403,7 @@ function displayTasks(tasksDataArray){
  * データベースからタスクの情報を削除し、表示を更新する
  * @param task_id_data:dataオブジェクト
  */
- function clickTaskDelete(task){
+function clickTaskDelete(task){
     $.ajax("./post.php",
         {
             type: "POST",
@@ -565,6 +567,41 @@ function deleteProject(project){
             alert("削除できませんでした" + e);
         });
     }
+}
+
+//実際の未完了タスク数を取得して反映させる
+//左上メニューの値を表示
+function displayIncompleteTasks(){
+    //今日、明日、明後日の日付を取得する
+    let dateToday = new Date();
+    let timestampTomorrow = new Date().getTime() + (1000 * 60 * 60 * 24 * 1);
+    let dateTomorrow = new Date(timestampTomorrow);
+    let timestampLater = new Date().getTime() + (1000 * 60 * 60 * 24 * 2);
+    let dateLater = new Date(timestampLater);
+    
+    let todayStr = dateToday.getFullYear() + "-" + (dateToday.getMonth() + 1) + "-" + dateToday.getDate();
+    let tomorrowStr = dateTomorrow.getFullYear() + "-" + (dateTomorrow.getMonth() + 1) + "-" + dateTomorrow.getDate();
+    let laterStr = dateLater.getFullYear() + "-" + (dateLater.getMonth() + 1) + "-" + dateLater.getDate();
+    //ajaxで今日、明日、それ以降、期限超過タスク数をもってくる
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                today: todayStr,
+                tomorrow: tomorrowStr,
+                later: laterStr, 
+                todo: "selectIncompleteTasksCount"
+            },
+            dataType: "json"
+        }
+    ).done(function(incompleteTasksCount){
+        vm.columns[COLUMN_TYPE.TODAY].countIncompleteTasks(incompleteTasksCount[0]["count"]);
+        vm.columns[COLUMN_TYPE.TOMORROW].countIncompleteTasks(incompleteTasksCount[1]["count"]);
+        vm.columns[COLUMN_TYPE.LATER].countIncompleteTasks(incompleteTasksCount[2]["count"]);
+        vm.columns[COLUMN_TYPE.INCOMPLETE].countIncompleteTasks(incompleteTasksCount[3]["count"]);
+    }).fail(function(e){
+        alert("未完了タスク数を表示できません\n" + e);
+    });
 }
 
 //タスク入力欄選択中にEnter

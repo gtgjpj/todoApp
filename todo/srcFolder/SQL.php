@@ -42,8 +42,7 @@ EOF;
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sql_project_id = "";
-            if ($project_id >= 0)
-            {
+            if ($project_id >= 0) {
                 $sql_project_id = "AND `project_id` = {$project_id}";
             }
             $sql = <<< EOF
@@ -165,27 +164,37 @@ EOF;
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sqlWhere = "";
             $array = array();
-            if($project_id != null && strlen($project_id) > 0){
-                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+            if ($project_id != null && strlen($project_id) > 0) {
+                if (strlen($sqlWhere) > 0) {
+                    $sqlWhere .= "AND";
+                }
                 $sqlWhere .= " `project_id` = :project_id ";
                 $array[":project_id"] = $project_id;
             }
-            if($date_from != null && strlen($date_from) > 0){
-                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+            if ($date_from != null && strlen($date_from) > 0) {
+                if (strlen($sqlWhere) > 0) {
+                    $sqlWhere .= "AND";
+                }
                 $sqlWhere .= " `completetion_date` >= STR_TO_DATE(:date_from, '%Y-%m-%d') ";
                 $array[":date_from"] = $date_from;
             }
-            if($date_to != null && strlen($date_to) > 0){
-                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+            if ($date_to != null && strlen($date_to) > 0) {
+                if (strlen($sqlWhere) > 0) {
+                    $sqlWhere .= "AND";
+                }
                 $sqlWhere .= " `completetion_date` <= STR_TO_DATE(:date_to, '%Y-%m-%d') ";
                 $array[":date_to"] = $date_to;
             }
-            if($status != null && strlen($status) > 0){
-                if(strlen($sqlWhere) > 0) $sqlWhere .= "AND";
+            if ($status != null && strlen($status) > 0) {
+                if (strlen($sqlWhere) > 0) {
+                    $sqlWhere .= "AND";
+                }
                 $sqlWhere .= " `task_status` = :status ";
                 $array[":status"] = $status;
             }
-            if (strlen($sqlWhere) > 0) $sqlWhere = "WHERE" . $sqlWhere;
+            if (strlen($sqlWhere) > 0) {
+                $sqlWhere = "WHERE" . $sqlWhere;
+            }
             $sql = <<< EOF
 SELECT
  `task_id`,
@@ -254,4 +263,45 @@ EOF;
 
         $pdo = null;
     }
+
+    //未完了タスク数を取得
+    public static function countIncompleteTasks($date_from, $date_to)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sqlWhere = "";
+            $array = array();
+
+            if ($date_from != null && $date_to != null){
+                $sqlWhere = "`completetion_date` = STR_TO_DATE(:date_to, '%Y-%m-%d')";
+                $array[":date_to"] = $date_to;
+            }else if($date_from != null){
+                $sqlWhere = "`completetion_date` >= STR_TO_DATE(:date_from, '%Y-%m-%d')";
+                $array[":date_from"] = $date_from;
+            }else{
+                $sqlWhere = "`completetion_date` < STR_TO_DATE(:date_to, '%Y-%m-%d')";
+                $array[":date_to"] = $date_to;
+            }
+            
+            $sql = <<< EOF
+SELECT COUNT(`task_id`) AS `count`
+FROM
+ `task`
+WHERE
+ `task_status` = 1
+AND
+ {$sqlWhere}
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($array);
+
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
+
