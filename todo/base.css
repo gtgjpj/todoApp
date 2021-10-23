@@ -12,7 +12,7 @@ i {
   color: #777;
 }
 
-body {
+.bodyDiv {
   background-color: #eee;
   border: solid 2px #777;
   box-sizing: border-box;

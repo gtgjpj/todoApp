@@ -15,7 +15,7 @@
     <div class="bodyDiv">
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.5.2</p>
+            <p class="user">みんまるたすく ver1.6.0</p>
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
