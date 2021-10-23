@@ -39,7 +39,8 @@
  * @function openComplete
  */
 
-const COLUMN_TYPE = { TODAY: 0, TOMORROW: 1, LATER: 2, COMPLETED: 3, INCOMPLETE: 4 }; 
+const COLUMN_TYPE = { TODAY: 0, TOMORROW: 1, LATER: 2, COMPLETED: 3, INCOMPLETE: 4 };
+const DEFAULT_PROJECT_COLOR = "#777777";
 
 //ビューモデルクラス
 class ViewModel {
@@ -57,6 +58,12 @@ class ViewModel {
     incompleteTasks = ko.observableArray();
     completedTasks = ko.observableArray();
 
+    //コラムフェードイン・フェードアウト
+    displayColumn = ko.observable(false);
+
+    //モバイル端末画面であるか？
+    isMobile = ko.observable(false);
+
     //完了済みタスクの表示フラグ(0:非表示)
     openCompleteTaskFlag = ko.observable(0);
 
@@ -70,10 +77,20 @@ class ViewModel {
 //コラム抽象クラス(モデル)
 class AbstractColumn {
     name = ko.observable('');
-    color = ko.observable('#777777');
-    constructor(name, color){
+    color = ko.observable(DEFAULT_PROJECT_COLOR);
+    icon = '';
+    constructor(name, color, icon){
         this.name(name);
         this.color(color);
+        this.icon = icon;
+    }
+
+    nameHtml(){
+        return this.name().replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#x27")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
     }
 }
 
@@ -81,20 +98,26 @@ class AbstractColumn {
 class Project extends AbstractColumn {
     id = null;
     constructor(id, name, color){
-        super(name, color);
+        super(name, color, 'label');
         this.id = id;
+    }
+
+    iconHtml(){
+        return `<i class="material-icons darkmode-ignore" style="color: ${this.color()}">${this.icon}</i>`;
     }
 }
 
 //コラムクラス(モデル)
 class Column extends AbstractColumn {
-    icon = '';
     type = '';
     countIncompleteTasks = ko.observable();
     constructor(name, color, icon, type){
-        super(name, color);
-        this.icon = icon;
+        super(name, color, icon);
         this.type = type;
+    }
+
+    iconHtml(){
+        return `<i class="material-icons icon-column" style="color: ${this.color()}">${this.icon}</i>`;
     }
 }
 
@@ -133,6 +156,17 @@ class Task{
 
 //ビューにビューモデルをバインド
 const vm = new ViewModel();
+vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
+ko.bindingHandlers.fadeVisible = {
+    init: function(element, valueAccessor){
+        const value = valueAccessor();
+        $(element).toggle(ko.unwrap(value));
+    },
+    update: function(element, valueAccessor){
+        const value = valueAccessor();
+        ko.unwrap(value) ? $(element).fadeIn() : $(element).fadeOut();
+    }
+}
 ko.applyBindings(vm);
 
 //ダークモードの設定
@@ -273,6 +307,9 @@ function displayTasks(tasksDataArray){
     //変更前のタスク一覧を削除する
     vm.incompleteTasks.removeAll();
     vm.completedTasks.removeAll();
+    if(vm.isMobile()){
+        vm.displayColumn(false);
+    }
     for(let i=0; i<tasksDataArray.length; i++){
         let task_id = tasksDataArray[i]["task_id"];
         //新しいタスクのプロジェクトID
@@ -374,7 +411,10 @@ function displayTasks(tasksDataArray){
             },
             dataType: "json"
         }
-    ).done(function(tasksDataArray){
+    ).done(function(data){
+        if(data == 0){
+            alert("タスクはすでに削除されています");
+        }
         //タスクを除去する
         vm.incompleteTasks.remove(task);
         vm.completedTasks.remove(task);
@@ -420,7 +460,7 @@ function displayProjects(projectsDataArray){
         const project_id = projectsDataArray[i]["project_id"];
         const project_name = projectsDataArray[i]["project_name"];
         let color = projectsDataArray[i]["color"];
-        if(color === null) color = '#777777';
+        if(color === null) color = DEFAULT_PROJECT_COLOR;
         vm.projects.push(new Project(project_id, project_name, color));
     }
 }
@@ -457,15 +497,19 @@ function inputProject(text){
             },
             dataType: "json"
         }
-    ).done(function(data){
+    ).done(function(project_id){
+        if(project_id <= 0){
+            alert("入力に失敗しました");
+            return;
+        }
+        const project_name = $("#input_project").val();
         //追加時、入力したテキストボックスを空にする
         $("#input_project").val("");
-        //プロジェクトの末尾に追加
-        for (let i=0; i < data.length; i++){
-            let color = data[i]["color"];
-            if(color === null) color = '#777777';
-            vm.projects.push(new Project(data[i]["project_id"], data[i]["project_name"], color));
-        }
+        //プロジェクトの末尾に追加し、選択状態にする
+        const project = new Project(project_id, project_name, DEFAULT_PROJECT_COLOR);
+        vm.projects.push(project);
+        vm.selectedColumn(project);
+        displayTaskOfSelectProject(project);
     }).fail(function(XMLHttpRequest, status, e){
         alert("入力に失敗しました\n" + e);
     });
@@ -489,7 +533,7 @@ function changeProjectColor(project, event){
             alert("プロジェクト色変更できませんでした");
             return;
         }
-        project.color = color;
+        project.color(color);
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクト色変更できませんでした" + e);
     });
