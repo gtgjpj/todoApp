@@ -22,7 +22,7 @@
             <i class="material-icons" style="z-index: 2; position: fixed;" data-bind="visible: isMobile, click: displayColumn(!displayColumn())">menu</i>
             <div class="main-column" style="z-index: 1;" data-bind="fadeVisible: displayColumn, style: { position: isMobile() ? 'fixed' : 'static' }">
                 <div data-bind="foreach: columns">
-                    <div class="column_box" data-bind="css: { selected_column: $root.selectedColumn() === $data }, click: clickColumn">
+                    <div class="column_box" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
                         <i class="material-icons icon-column" data-bind="text: icon, style: { color: color }"></i>
                         <p data-bind="text: name"></p>
                         <p class="counts" data-bind="text: countIncompleteTasks"></p>
@@ -30,7 +30,7 @@
                 </div>
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects" data-bind="foreach: projects">
-                    <div class="main-column-projects-project" data-bind="click: displayTaskOfSelectProject, css: { selected_column: $root.selectedColumn() === $data }">
+                    <div class="main-column-projects-project" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
                         <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }, html: iconHtml()">
                         </label>
                         <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
