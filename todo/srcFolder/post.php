@@ -80,11 +80,11 @@ function selectProject()
 function selectTasks()
 {
     $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : null;
-    $date_from = isset($_POST['date_from']) ? $_POST['date_from'] : null;
-    $date_to = isset($_POST['date_to']) ? $_POST['date_to'] : null;
+    $date_range_start = isset($_POST['date_range_start']) ? $_POST['date_range_start'] : null;
+    $date_range_end = isset($_POST['date_range_end']) ? $_POST['date_range_end'] : null;
     $status = isset($_POST['status']) ? $_POST['status'] : null;
     //該当タスク取得
-    $new_tasks_row = SQL::selectTasks($project_id, $date_from, $date_to, $status);
+    $new_tasks_row = SQL::selectTasks($project_id, $date_range_start, $date_range_end, $status);
     //新しいタスクのデータを返す
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($new_tasks_row);

@@ -157,7 +157,7 @@ EOF;
     }
 
     //タスクのSELECT
-    public static function selectTasks($project_id, $date_from, $date_to, $status)
+    public static function selectTasks($project_id, $completetion_date_range_start, $completetion_date_range_end, $status)
     {
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
@@ -171,19 +171,19 @@ EOF;
                 $sqlWhere .= " `project_id` = :project_id ";
                 $array[":project_id"] = $project_id;
             }
-            if ($date_from != null && strlen($date_from) > 0) {
+            if ($completetion_date_range_start != null && strlen($completetion_date_range_start) > 0) {
                 if (strlen($sqlWhere) > 0) {
                     $sqlWhere .= "AND";
                 }
-                $sqlWhere .= " `completetion_date` >= STR_TO_DATE(:date_from, '%Y-%m-%d') ";
-                $array[":date_from"] = $date_from;
+                $sqlWhere .= " `completetion_date` >= STR_TO_DATE(:completetion_date_range_start, '%Y-%m-%d') ";
+                $array[":completetion_date_range_start"] = $completetion_date_range_start;
             }
-            if ($date_to != null && strlen($date_to) > 0) {
+            if ($completetion_date_range_end != null && strlen($completetion_date_range_end) > 0) {
                 if (strlen($sqlWhere) > 0) {
                     $sqlWhere .= "AND";
                 }
-                $sqlWhere .= " `completetion_date` <= STR_TO_DATE(:date_to, '%Y-%m-%d') ";
-                $array[":date_to"] = $date_to;
+                $sqlWhere .= " `completetion_date` <= STR_TO_DATE(:completetion_date_range_end, '%Y-%m-%d') ";
+                $array[":completetion_date_range_end"] = $completetion_date_range_end;
             }
             if ($status != null && strlen($status) > 0) {
                 if (strlen($sqlWhere) > 0) {

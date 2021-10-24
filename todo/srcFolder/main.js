@@ -2,12 +2,8 @@
  * //サウンドの変更
  * @function changeSound
  * //表示関係
- * //選択したプロジェクトのタスクを取得し、画面更新
- * @function displayTaskOfSelectProject
- * //プロジェクトのタスク一覧を取得して表示する
+ * //コラム・プロジェクトのタスクをDBから取得し一覧表示する
  * @function displayTasks
- * //日付を指定してタスクを取得
- * @function displayTasksByDayColumn
  * 
  * //タスクのボタン有効化
  * //タスク削除クリック処理
@@ -31,26 +27,26 @@
  * //日付入力欄に初期値（今日）を設定
  * @function initTaskDate
  * 
- * //左上5ボタン
- * @function clickColumn
- * 
  * //表示、非表示処理
  * //完了済みタスクの表示非表示 
  * @function openComplete
  */
 
+//コラム配列(vm.columns)インデックス
 const COLUMN_TYPE = { TODAY: 0, TOMORROW: 1, LATER: 2, COMPLETED: 3, INCOMPLETE: 4 };
+//日付範囲(昨日、今日、明日、明後日)
+const DATE_RANGE = { YESTERDAY: -1, TODAY: 0, TOMORROW: 1, DAY_AFTER_TOMORROW: 2 };
 const DEFAULT_PROJECT_COLOR = "#777777";
 
 //ビューモデルクラス
 class ViewModel {
     // コラム・プロジェクト(画面左側)
     columns = [
-        new Column("今日", "#66cdaa", "wb_sunny", "today"),
-        new Column("明日", "#ffa500", "wb_twilight", "tomorrow"),
-        new Column("それ以降", "#1e90ff", "date_range", "later"),
-        new Column("完了済み", "#777", "check_circle_outline", "completed"),
-        new Column("期限超過", "#ff5416cc", "new_releases", "incomplete")
+        new Column("今日", "#66cdaa", "wb_sunny", DATE_RANGE.TODAY, DATE_RANGE.TODAY, null),
+        new Column("明日", "#ffa500", "wb_twilight", DATE_RANGE.TOMORROW, DATE_RANGE.TOMORROW, null),
+        new Column("それ以降", "#1e90ff", "date_range", DATE_RANGE.DAY_AFTER_TOMORROW, null, null),
+        new Column("完了済み", "#777", "check_circle_outline", null, null, 0),
+        new Column("期限超過", "#ff5416cc", "new_releases", null, DATE_RANGE.YESTERDAY, null)
     ];
     projects = ko.observableArray();
 
@@ -79,6 +75,13 @@ class AbstractColumn {
     name = ko.observable('');
     color = ko.observable(DEFAULT_PROJECT_COLOR);
     icon = '';
+
+    /**
+     * コンストラクタ
+     * @param name:名称
+     * @param color:ラベル色・アイコン色
+     * @param icon:アイコン(Google Fonts)
+     */
     constructor(name, color, icon){
         this.name(name);
         this.color(color);
@@ -92,11 +95,24 @@ class AbstractColumn {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
     }
+
+    //displayTasks()条件項目
+    get projectId(){ return null; }
+    get completetionDateRangeStart(){ return null; }
+    get completetionDateRangeEnd(){ return null; }
+    get taskStatus(){ return null; }
 }
 
 //プロジェクトクラス(モデル)
 class Project extends AbstractColumn {
     id = null;
+
+    /**
+     * コンストラクタ
+     * @param id:プロジェクトID
+     * @param name:プロジェクト名称
+     * @param color:ラベル色
+     */
     constructor(id, name, color){
         super(name, color, 'label');
         this.id = id;
@@ -105,20 +121,53 @@ class Project extends AbstractColumn {
     iconHtml(){
         return `<i class="material-icons darkmode-ignore" style="color: ${this.color()}">${this.icon}</i>`;
     }
+
+    //displayTasks()条件項目(オーバーライド)
+    get projectId(){ return this.id; }
 }
 
 //コラムクラス(モデル)
 class Column extends AbstractColumn {
-    type = '';
+    #completetionDateRangeStart = null;
+    #completetionDateRangeEnd = null;
+    #taskStatus = null;
     countIncompleteTasks = ko.observable();
-    constructor(name, color, icon, type){
+
+    /**
+     * コンストラクタ
+     * @param name:コラム名称
+     * @param color:アイコン色
+     * @param icon:アイコン(Google Fonts)
+     * @param completetionDateRangeStart:表示するタスク期限日(期間開始日, DATE_RANGEを使用)
+     * @param completetionDateRangeEnd:表示するタスク期限日(期間終了日, DATE_RANGEを使用)
+     * @param taskStatus:表示するタスクステータス(0:完了済み, 1:未完了)
+     */
+    constructor(name, color, icon, completetionDateRangeStart, completetionDateRangeEnd, taskStatus){
         super(name, color, icon);
-        this.type = type;
+        this.#completetionDateRangeStart = completetionDateRangeStart;
+        this.#completetionDateRangeEnd = completetionDateRangeEnd;
+        this.#taskStatus = taskStatus;
     }
 
     iconHtml(){
         return `<i class="material-icons icon-column" style="color: ${this.color()}">${this.icon}</i>`;
     }
+
+    //daysLater日後の日付文字列を取得する(プライベートメソッド)
+    #daysLaterToDateStr(daysLater){
+        if(daysLater === null || typeof(daysLater)!= "number") return null;
+        const d = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * daysLater));
+        return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    }
+
+    //displayTasks()条件項目(オーバーライド)
+    get completetionDateRangeStart(){
+        return this.#daysLaterToDateStr(this.#completetionDateRangeStart);
+    }
+    get completetionDateRangeEnd(){
+        return this.#daysLaterToDateStr(this.#completetionDateRangeEnd);
+    }
+    get taskStatus(){ return this.#taskStatus; }
 }
 
 //タスククラス(モデル)
@@ -276,125 +325,42 @@ function changeSound(){
 }
 
 /**
- * @function 選択したプロジェクトのタスクを取得し、画面更新
- * @param project_id:選択したプロジェクトのid
+ * @function コラム・プロジェクトのタスクをDBから取得し一覧表示する
+ * @param column:対象コラム・プロジェクト
  */
-function displayTaskOfSelectProject(project){
-    //タスク一覧のタイトル設定
-    vm.selectedColumn(project);
+function displayTasks(column){
     //タスク一覧を表示
     $.ajax("./post.php",
         {
             type: "POST",
             data:{
-                project_id: project.id,
+                project_id: column.projectId,
+                date_range_start: column.completetionDateRangeStart,
+                date_range_end: column.completetionDateRangeEnd,
+                status: column.taskStatus,
                 todo: "selectTasks"
             },
             dataType: "json"
         }
     ).done(function(tasksDataArray){
         //返ってきたタスク処理する
-        displayTasks(tasksDataArray);
+        vm.selectedColumn(column);
+        vm.incompleteTasks.removeAll();
+        vm.completedTasks.removeAll();
+        for(const row of tasksDataArray){
+            const task = readTaskFromRow(row);
+            if(task.isCompleted){
+                //完了済みタスク
+                vm.completedTasks.push(task);
+            }else{
+                //未完了タスク
+                vm.incompleteTasks.push(task);
+            }
+        }
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを表示できません\n" + e);
     });
     return true;
-}
-
-/**
- * プロジェクトのタスク一覧を取得して表示する
- * @param tasksDataArray:
- */
-function displayTasks(tasksDataArray){
-    //変更前のタスク一覧を削除する
-    vm.incompleteTasks.removeAll();
-    vm.completedTasks.removeAll();
-    if(vm.isMobile()){
-        vm.displayColumn(false);
-    }
-    for(let i=0; i<tasksDataArray.length; i++){
-        let task_id = tasksDataArray[i]["task_id"];
-        //新しいタスクのプロジェクトID
-        let project_id = tasksDataArray[i]["project_id"];
-        //新しいタスクの内容
-        let task_value = tasksDataArray[i]["task_value"];
-        //新しいタスクの期限
-        let task_completetion_date = tasksDataArray[i]["completetion_date"];
-        //新しいタスクのstatus
-        let task_status = tasksDataArray[i]["task_status"];
-        let project = null;
-        vm.projects().forEach(function(v, i){
-            if(v.id != project_id) return;
-            project = v;
-        });
-
-        const task = new Task(task_id, project, task_value, task_completetion_date, task_status);
-        if(task.isCompleted){
-            vm.completedTasks.push(task);
-        }else{
-            vm.incompleteTasks.push(task);
-        }
-    }
-}
-
-/**
- * 日付を指定してタスクを取得
- * @param day :検索表示する日付 
- * 
-*/
-function displayTasksByDayColumn(day){
-    const todo = "selectTasks";
-    let dateFrom = null;
-    let dateTo = null;
-    let status = null;
-    switch(day){
-        case "today":
-            dateFrom = new Date();
-            dateTo = dateFrom;
-            break;
-        case "tomorrow":
-            dateFromTimestamp = new Date().getTime() + (1000 * 60 * 60 * 24 * 1);
-            dateFrom = new Date(dateFromTimestamp);
-            dateTo = dateFrom;
-            break;
-        case "later":
-            dateFromTimestamp = new Date().getTime() + (1000 * 60 * 60 * 24 * 2);
-            dateFrom = new Date(dateFromTimestamp);
-            break;
-        case "incomplete":
-            dateToTimestamp = new Date().getTime() - (1000 * 60 * 60 * 24 * 1);
-            dateTo = new Date(dateToTimestamp);
-            break;
-        case "completed":
-            status = "0";
-            break;
-    }
-    let dateFromStr = null;
-    if(dateFrom != null){
-        dateFromStr = dateFrom.getFullYear() + "-" + (dateFrom.getMonth() + 1) + "-" + dateFrom.getDate();
-    }
-    let dateToStr = null;
-    if(dateTo != null){
-        dateToStr = dateTo.getFullYear() + "-" + (dateTo.getMonth() + 1) + "-" + dateTo.getDate();
-    }
-
-    //Ajax
-    $.ajax("./post.php",
-            {
-                type: "POST",
-                data:{
-                    date_from: dateFromStr,
-                    date_to: dateToStr,
-                    status: status,
-                    todo: todo
-                },
-                dataType: "json"
-            }
-        ).done(function(tasksDataArray){
-            displayTasks(tasksDataArray);
-        }).fail(function(XMLHttpRequest, status, e){
-            alert("タスクを表示できませんでした\n" + e);
-        });
 }
 
 /**
@@ -445,12 +411,7 @@ function clickTaskStatus(task){
             dataType: "json"
         }
     ).done(function(tasksDataArray){
-        if(project_id === null){
-            displayTasksByDayColumn(vm.selectedColumn().type);
-        }else{
-            //返ってきたタスク処理する
-            displayTasks(tasksDataArray);
-        }
+        displayTasks(vm.selectedColumn());
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクの状態を変更できません\n" + e);
     });
@@ -482,7 +443,7 @@ function initProjects(){
         //返ってきたプロジェクト処理する
         displayProjects(projectsDataArray);
         //今日のタスク表示
-        clickColumn(vm.columns[COLUMN_TYPE.TODAY]);
+        displayTasks(vm.columns[COLUMN_TYPE.TODAY]);
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクトを表示できません\n" + e);
     });
@@ -510,8 +471,7 @@ function inputProject(text){
         //プロジェクトの末尾に追加し、選択状態にする
         const project = new Project(project_id, project_name, DEFAULT_PROJECT_COLOR);
         vm.projects.push(project);
-        vm.selectedColumn(project);
-        displayTaskOfSelectProject(project);
+        displayTasks(project);
     }).fail(function(XMLHttpRequest, status, e){
         alert("入力に失敗しました\n" + e);
     });
@@ -635,7 +595,7 @@ function inputTask(text){
     ).done(function(tasksDataArray){
         //入力したタスク名を空白にする
         $("#input_task").val("");
-        displayTasks(tasksDataArray);
+        displayTasks(vm.selectedColumn());
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを追加できませんでした\n" + e);
     });
@@ -657,12 +617,6 @@ function initTaskDate(){
     //フォームの初期値を表示
     let todayInit = year + "-" + month + "-" + day;
     $("#input_date").val(todayInit);
-}
-
-//条件ボタン
-function clickColumn(column){
-    vm.selectedColumn(column);
-    displayTasksByDayColumn(column.type);
 }
 
 //完了済みタスクの表示非表示 
@@ -714,4 +668,23 @@ function keydownRenameProject(project, event){
 function blurProjectName(project, event){
     vm.renameProject(null);
     return true;
+}
+
+//バックエンドから返されたタスク配列の要素を読み込みTaskオブジェクトを作成
+function readTaskFromRow(row){
+    //各項目を取得する
+    const task_id = row["task_id"];
+    const project_id = row["project_id"];
+    const task_value = row["task_value"];
+    const completetion_date = row["completetion_date"];
+    const task_status = row["task_status"];
+
+    // プロジェクトIDより対応するプロジェクトオブジェクトを探す
+    let project = null;
+    vm.projects().forEach(function(v, i){
+        if(v.id != project_id) return;
+        project = v;
+    });
+
+    return new Task(task_id, project, task_value, completetion_date, task_status);
 }

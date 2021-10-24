@@ -1,0 +1,49 @@
+@startuml
+class ViewModel {
+  +columns : Column[]
+  +projects : ko.observableArray
+  +incompleteTasks : ko.observableArray
+  +completedTasks : ko.observableArray
+  +displayColumn : ko.observable
+  +isMobile : ko.observable
+  +openCompleteTaskFlag : ko.observable
+  +selectedColumn : ko.observable
+  +renameProject : ko.observable
+}
+ViewModel o-- Project
+ViewModel o-- Column
+class AbstractColumn {
+  +name : ko.observable
+  +color : ko.observable
+  +icon : String
+  +nameHtml() : String
+}
+class Project {
+  +id : Number
+  +iconHtml() : String
+  +get projectId() : Number
+}
+AbstractColumn <|-- Project
+class Column {
+  -completetionDateRangeStart : Number
+  -completetionDateRangeEnd : Number
+  -taskStatus : Number
+  +countIncompleteTasks : ko.observable
+  +iconHtml() : String
+  -daysLaterToDateStr(daysLater)
+  +get completetionDateRangeStart()
+  +get completetionDateRangeEnd()
+  +get taskStatus()
+}
+AbstractColumn <|-- Column
+class Task {
+  +id : Number
+  +project : Project
+  +value : String
+  +completetionDate : String
+  +status : Number
+  +get isCompleted() : Boolean
+  +get isExpired() : Boolean
+}
+ViewModel o-- Task
+@enduml
