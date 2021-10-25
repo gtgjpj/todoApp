@@ -31,7 +31,8 @@
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects" data-bind="foreach: projects">
                     <div class="main-column-projects-project" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
-                        <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }, html: iconHtml()">
+                        <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }">
+                            <i class="material-icons darkmode-ignore" data-bind="style: { color: color }, text: icon"></i>
                         </label>
                         <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
                         <p class="name" data-bind="text: name, click: clickProjectName, hidden: $root.renameProject() === $data"></p>
@@ -46,7 +47,9 @@
                 </div>
             </div>
             <div class="main-todo">
-                <h2 id="todo_title" data-bind="html: selectedColumn() !== null ? `${selectedColumn().iconHtml()}${selectedColumn().nameHtml()}` : 'プロジェクト未選択'"></h2>
+                <div id="todo_title">
+                    <i class="material-icons darkmode-ignore" data-bind="css: { 'icon-column': selectedColumn() instanceof Column }, style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' }, text: selectedColumn() !== null ? selectedColumn().icon : ''"></i><span data-bind="text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"></span>
+                </div>
                 <div class="main-todo-result" data-bind="style: { marginLeft: isMobile() ? '0px' : '30px', width: isMobile() ? '100%' : '500px'}">
                     <div class="main-todo-result-incomplete" data-bind="style: { marginLeft: isMobile() ? '20%' : '130px'}">
                         <h3 id="incomplete_task_count" data-bind="text: incompleteTasks().length"></h3>
