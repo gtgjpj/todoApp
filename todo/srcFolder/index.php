@@ -15,12 +15,12 @@
     <div class="bodyDiv">
         <div class="header">
             <i class="icon-person material-icons">person</i>
-            <p class="user">みんまるたすく ver1.6.0</p>
+            <p class="user">みんまるたすく ver1.6.1</p>
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
-            <i class="material-icons" style="z-index: 2; position: fixed;" data-bind="visible: isMobile, click: displayColumn(!displayColumn())">menu</i>
-            <div class="main-column" style="z-index: 1;" data-bind="fadeVisible: displayColumn, style: { position: isMobile() ? 'fixed' : 'static' }">
+            <i class="material-icons hamburger" data-bind="visible: isMobile, click: displayColumn(!displayColumn())">menu</i>
+            <div class="main-column" data-bind="visible: displayColumn">
                 <div data-bind="foreach: columns">
                     <div class="column_box" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
                         <i class="material-icons icon-column" data-bind="text: icon, style: { color: color }"></i>
@@ -31,7 +31,8 @@
                 <hr class="hr_gray">
                 <div id="projects" class="main-column-projects" data-bind="foreach: projects">
                     <div class="main-column-projects-project" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
-                        <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }, html: iconHtml()">
+                        <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }">
+                            <i class="material-icons darkmode-ignore" data-bind="style: { color: color }, text: icon"></i>
                         </label>
                         <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
                         <p class="name" data-bind="text: name, click: clickProjectName, hidden: $root.renameProject() === $data"></p>
@@ -46,14 +47,16 @@
                 </div>
             </div>
             <div class="main-todo">
-                <h2 id="todo_title" data-bind="html: selectedColumn() !== null ? `${selectedColumn().iconHtml()}${selectedColumn().nameHtml()}` : 'プロジェクト未選択'"></h2>
+                <div id="todo_title">
+                    <i class="material-icons darkmode-ignore" data-bind="css: { 'icon-column': selectedColumn() instanceof Column }, style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' }, text: selectedColumn() !== null ? selectedColumn().icon : ''"></i><span data-bind="text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"></span>
+                </div>
                 <div class="main-todo-result" data-bind="style: { marginLeft: isMobile() ? '0px' : '30px', width: isMobile() ? '100%' : '500px'}">
                     <div class="main-todo-result-incomplete" data-bind="style: { marginLeft: isMobile() ? '20%' : '130px'}">
-                        <h3 id="incomplete_task_count" data-bind="text: incompleteTasks().length"></h3>
+                        <p id="incomplete_task_count" data-bind="text: incompleteTasks().length"></p>
                         <p>未完了</p>
                     </div>
                     <div class="main-todo-result-complete" data-bind="style: { marginLeft: isMobile() ? '20%' : '130px'}">
-                        <h3 id="complete_task_count" data-bind="text: completedTasks().length"></h3>
+                        <p id="complete_task_count" data-bind="text: completedTasks().length"></p>
                         <p>完了済み</p>
                     </div>
                 </div>

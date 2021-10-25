@@ -84,6 +84,9 @@
 
 #todo_title {
   margin: 20px 25px;
+  color: #555;
+  font-size: 1.5em;
+  font-weight: bolder;
 }
 .main-todo {
   border-left: solid 1px;
@@ -102,9 +105,12 @@
   text-align: center;
   margin-left: 130px;
 }
-.main-todo-result-incomplete h3,
-.main-todo-result-complete h3 {
+
+#incomplete_task_count,
+#complete_task_count {
   color: orangered;
+  font-weight: bold;
+  font-size: 18px;
 }
 .main-todo-body {
   overflow-y: scroll;
@@ -183,4 +189,8 @@
 .color-picker {
   position: absolute;
   visibility: hidden;
+}
+
+.hamburger {
+  position: fixed;
 }
