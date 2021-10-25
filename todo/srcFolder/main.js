@@ -36,6 +36,9 @@
 const COLUMN_TYPE = { TODAY: 0, TOMORROW: 1, LATER: 2, COMPLETED: 3, INCOMPLETE: 4 };
 //日付範囲(昨日、今日、明日、明後日)
 const DATE_RANGE = { YESTERDAY: -1, TODAY: 0, TOMORROW: 1, DAY_AFTER_TOMORROW: 2 };
+//タスクステータス(0:完了済み、1:未完了)
+const TASK_STATUS = { COMPLETED: 0, INCOMPLETE: 1 };
+//デフォルトプロジェクト色
 const DEFAULT_PROJECT_COLOR = "#777777";
 
 //ビューモデルクラス
@@ -45,7 +48,7 @@ class ViewModel {
         new Column("今日", "#66cdaa", "wb_sunny", DATE_RANGE.TODAY, DATE_RANGE.TODAY, null),
         new Column("明日", "#ffa500", "wb_twilight", DATE_RANGE.TOMORROW, DATE_RANGE.TOMORROW, null),
         new Column("それ以降", "#1e90ff", "date_range", DATE_RANGE.DAY_AFTER_TOMORROW, null, null),
-        new Column("完了済み", "#777", "check_circle_outline", null, null, 0),
+        new Column("完了済み", "#777", "check_circle_outline", null, null, TASK_STATUS.COMPLETED),
         new Column("期限超過", "#ff5416cc", "new_releases", null, DATE_RANGE.YESTERDAY, null)
     ];
     projects = ko.observableArray();
@@ -138,7 +141,7 @@ class Column extends AbstractColumn {
     }
 
     //daysLater日後の日付文字列を取得する(プライベートメソッド)
-    #daysLaterToDateStr(daysLater){
+    daysLaterToDateStr(daysLater){
         if(daysLater === null || typeof(daysLater)!= "number") return null;
         const d = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * daysLater));
         return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
@@ -146,10 +149,10 @@ class Column extends AbstractColumn {
 
     //displayTasks()条件項目(オーバーライド)
     get completetionDateRangeStart(){
-        return this.#daysLaterToDateStr(this.#completetionDateRangeStart);
+        return this.daysLaterToDateStr(this.#completetionDateRangeStart);
     }
     get completetionDateRangeEnd(){
-        return this.#daysLaterToDateStr(this.#completetionDateRangeEnd);
+        return this.daysLaterToDateStr(this.#completetionDateRangeEnd);
     }
     get taskStatus(){ return this.#taskStatus; }
 }
@@ -170,7 +173,7 @@ class Task{
     }
 
     //完了したか？
-    get isCompleted(){ return this.status != 1; }
+    get isCompleted(){ return this.status == TASK_STATUS.COMPLETED; }
 
     //期限切れか？
     get isExpired(){
@@ -190,16 +193,6 @@ class Task{
 //ビューにビューモデルをバインド
 const vm = new ViewModel();
 vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
-ko.bindingHandlers.fadeVisible = {
-    init: function(element, valueAccessor){
-        const value = valueAccessor();
-        $(element).toggle(ko.unwrap(value));
-    },
-    update: function(element, valueAccessor){
-        const value = valueAccessor();
-        ko.unwrap(value) ? $(element).fadeIn() : $(element).fadeOut();
-    }
-}
 ko.applyBindings(vm);
 
 //ダークモードの設定

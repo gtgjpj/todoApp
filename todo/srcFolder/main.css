@@ -187,3 +187,7 @@
   position: absolute;
   visibility: hidden;
 }
+
+.hamburger {
+  position: fixed;
+}
