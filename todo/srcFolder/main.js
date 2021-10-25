@@ -88,14 +88,6 @@ class AbstractColumn {
         this.icon = icon;
     }
 
-    nameHtml(){
-        return this.name().replace(/&/g, "&amp;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#x27")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-    }
-
     //displayTasks()条件項目
     get projectId(){ return null; }
     get completetionDateRangeStart(){ return null; }
@@ -116,10 +108,6 @@ class Project extends AbstractColumn {
     constructor(id, name, color){
         super(name, color, 'label');
         this.id = id;
-    }
-
-    iconHtml(){
-        return `<i class="material-icons darkmode-ignore" style="color: ${this.color()}">${this.icon}</i>`;
     }
 
     //displayTasks()条件項目(オーバーライド)
@@ -147,10 +135,6 @@ class Column extends AbstractColumn {
         this.#completetionDateRangeStart = completetionDateRangeStart;
         this.#completetionDateRangeEnd = completetionDateRangeEnd;
         this.#taskStatus = taskStatus;
-    }
-
-    iconHtml(){
-        return `<i class="material-icons icon-column" style="color: ${this.color()}">${this.icon}</i>`;
     }
 
     //daysLater日後の日付文字列を取得する(プライベートメソッド)
