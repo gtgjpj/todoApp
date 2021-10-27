@@ -190,6 +190,11 @@
   position: absolute;
   visibility: hidden;
 }
+.color-picker-mobile {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
 
 .hamburger {
   position: fixed;
