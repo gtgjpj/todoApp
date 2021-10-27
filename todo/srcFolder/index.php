@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="../base.css">
     <link rel="stylesheet" href="./main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -34,7 +34,14 @@
                         <label class="label_project" data-bind="attr: { 'for': `cp-project_id_${id}` }">
                             <i class="material-icons darkmode-ignore" data-bind="style: { color: color }, text: icon"></i>
                         </label>
-                        <input type="color" class="color-picker" data-bind="value: color, attr: { 'id': `cp-project_id_${id}` }, event: { change: changeProjectColor }"/>
+                        <input type="color" class="color-picker" data-bind="
+                            css: {
+                                'color-picker' : !$root.isMobile(),
+                                'color-picker-mobile' : $root.isMobile()
+                            },
+                            value: color,
+                            attr: { 'id': `cp-project_id_${id}` },
+                            event: { change: changeProjectColor }"/>
                         <p class="name" data-bind="text: name, click: clickProjectName, hidden: $root.renameProject() === $data"></p>
                         <input type="text" class="rename" maxlength="30" data-bind="visible: $root.renameProject() === $data, hasfocus: $root.renameProject() === $data, event: { keydown: keydownRenameProject, blur: blurProjectName }" placeholder="入力してEnter"/>
                         <i class="material-icons delete_project_button" data-bind="click: deleteProject, clickBubble: false">delete_forever</i>
@@ -48,7 +55,11 @@
             </div>
             <div class="main-todo">
                 <div id="todo_title">
-                    <i class="material-icons darkmode-ignore" data-bind="css: { 'icon-column': selectedColumn() instanceof Column }, style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' }, text: selectedColumn() !== null ? selectedColumn().icon : ''"></i><span data-bind="text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"></span>
+                    <i class="material-icons darkmode-ignore" data-bind="
+                        css: { 'icon-column': selectedColumn() instanceof Column },
+                        style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' },
+                        text: selectedColumn() !== null ? selectedColumn().icon : ''"></i><span data-bind="
+                        text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"></span>
                 </div>
                 <div class="main-todo-result" data-bind="style: { marginLeft: isMobile() ? '0px' : '30px', width: isMobile() ? '100%' : '500px'}">
                     <div class="main-todo-result-incomplete" data-bind="style: { marginLeft: isMobile() ? '20%' : '130px'}">
