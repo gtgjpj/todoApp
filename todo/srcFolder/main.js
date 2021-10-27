@@ -57,8 +57,8 @@ class ViewModel {
     incompleteTasks = ko.observableArray();
     completedTasks = ko.observableArray();
 
-    //コラムフェードイン・フェードアウト
-    displayColumn = ko.observable(false);
+    //コラム・プロジェクト一覧表示中であるか？
+    displayColumn = ko.observable(true);
 
     //モバイル端末画面であるか？
     isMobile = ko.observable(false);
