@@ -363,6 +363,8 @@ function clickTaskDelete(task){
         //タスクを除去する
         vm.incompleteTasks.remove(task);
         vm.completedTasks.remove(task);
+        //未完了タスク数が変更される可能性があるため、更新する
+        displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを削除できません\n" + e);
     });
@@ -389,6 +391,8 @@ function clickTaskStatus(task){
         }
     ).done(function(tasksDataArray){
         displayTasks(vm.selectedColumn());
+        //未完了タスク数が変更される可能性があるため、更新する
+        displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクの状態を変更できません\n" + e);
     });
@@ -449,6 +453,7 @@ function inputProject(text){
         const project = new Project(project_id, project_name, DEFAULT_PROJECT_COLOR);
         vm.projects.push(project);
         displayTasks(project);
+        
     }).fail(function(XMLHttpRequest, status, e){
         alert("入力に失敗しました\n" + e);
     });
@@ -500,6 +505,8 @@ function deleteProject(project){
             if(vm.selectedColumn() === project){
                 vm.selectedColumn(null);
             }
+            //未完了タスク数が変更される可能性があるため、更新する
+            displayIncompleteTasks();
         }).fail(function(XMLHttpRequest, status, e){
             alert("削除できませんでした" + e);
         });
@@ -573,6 +580,8 @@ function inputTask(text){
         //入力したタスク名を空白にする
         $("#input_task").val("");
         displayTasks(vm.selectedColumn());
+        //未完了タスク数が変更されるため、更新する
+        displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
         alert("タスクを追加できませんでした\n" + e);
     });
