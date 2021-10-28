@@ -19,7 +19,7 @@
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
-            <i class="material-icons hamburger" data-bind="visible: isMobile, click: displayColumn(!displayColumn())">menu</i>
+            <i class="material-icons hamburger" data-bind="visible: isMobile, click: function(){displayColumn(!displayColumn())}">menu</i>
             <div class="main-column" data-bind="visible: displayColumn">
                 <div data-bind="foreach: columns">
                     <div class="column_box" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">
