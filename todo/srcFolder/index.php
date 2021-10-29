@@ -8,15 +8,42 @@
     <link rel="stylesheet" href="../base.css">
     <link rel="stylesheet" href="./main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" data-bind="attr: { href: fontFamilyHref }">
     <title>To-Do</title>
 </head>
 
 <body data-bind="style: { width: isMobile() ? '100%' : '800px', margin: isMobile() ? '0' : '8px' }">
-    <div class="bodyDiv">
+    <div class="bodyDiv" data-bind="
+        style: {
+            backgroundImage: backgroundImage() !== null ? 'url(' + backgroundImage() + ')' : 'none',
+            'font-family': selectedFontFamily() }">
         <div class="header">
             <i class="icon-person material-icons">person</i>
             <p class="user">みんまるたすく ver1.7.0</p>
+            <i class="icon-settings material-icons" data-bind="
+                click: function(){displaySettings(!displaySettings())},
+                visible: displaySettingsIcon">settings</i>
             <i id="sound" class="icon-settings material-icons">notifications_off</i>
+        </div>
+        <div class="settings" data-bind="visible: displaySettings">
+            <i class="material-icons settings-icons" data-bind="click: function(){displaySettings(!displaySettings())}">clear</i>
+            フォント:
+            <select data-bind="
+                event: {
+                    change: changeFontFamily
+                },
+                options: availableFontFamilies,
+                optionsText: 'name',
+                optionsValue: 'fontFamily',
+                value: selectedFontFamily"></select>
+            &nbsp;|&nbsp;
+            <label>
+                背景画像:
+                <i class="material-icons settings-icons">image</i>
+                <span data-bind="text: `MAX:${imageFileMaxSize()}B`"></span>
+                <input type="file" class="settings-background-image-file" accept="image/*" data-bind="event: { change: changeBackgroundImage }"/>
+            </label>
+            <i class="material-icons settings-icons" data-bind="click: function(){updateBackgroundImage('')}">delete</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
             <i class="material-icons hamburger" data-bind="visible: isMobile, click: function(){displayColumn(!displayColumn())}">menu</i>

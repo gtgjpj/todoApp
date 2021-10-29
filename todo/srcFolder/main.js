@@ -40,6 +40,8 @@ const DATE_RANGE = { YESTERDAY: -1, TODAY: 0, TOMORROW: 1, DAY_AFTER_TOMORROW: 2
 const TASK_STATUS = { COMPLETED: 0, INCOMPLETE: 1 };
 //デフォルトプロジェクト色
 const DEFAULT_PROJECT_COLOR = "#777777";
+//デフォルトフォントファミリー
+const DEFAULT_FONT_FAMILY = "unset";
 
 //ビューモデルクラス
 class ViewModel {
@@ -71,6 +73,26 @@ class ViewModel {
 
     //名称変更中のプロジェクト
     renameProject = ko.observable(null);
+
+    //設定ウィンドウ表示中であるか？
+    displaySettings = ko.observable(false);
+
+    /*** 設定 ***/
+    //設定アイコン表示・非表示
+    displaySettingsIcon = ko.observable(false);
+ 
+    //背景画像
+    imageFileMaxSize = ko.observable('0');
+    backgroundImage = ko.observable(null);
+
+    //フォント
+    availableFontFamilies = [
+        new FontFamily("デフォルト", "unset"),
+        new FontFamily("Zen Antique", "'Zen Antique'"),
+        new FontFamily("Rampart One", "'Rampart One'"),
+        new FontFamily("Hachi Maru Pop", "'Hachi Maru Pop'")
+    ];
+    selectedFontFamily = ko.observable(DEFAULT_FONT_FAMILY);
 }
 
 //コラム抽象クラス(モデル)
@@ -190,10 +212,51 @@ class Task{
     }
 }
 
+//ヘッダー用ビューモデルクラス
+class HeadViewModel {
+    //フォントファミリー(Google Fonts読み込み用)
+    fontFamilyHref = ko.computed(function(){
+        if(vm.selectedFontFamily() === "unset") {
+            return "";
+        }
+        const param = vm.selectedFontFamily().replaceAll("\'", "").replaceAll(" ", "+");
+        return `https://fonts.googleapis.com/css2?family=${param}&display=swap`;
+    });
+}
+
+//フォントファミリー(ユーザー設定用)
+class FontFamily {
+    name = '';
+    fontFamily = '';
+    constructor(name, fontFamily){
+        this.name = name;
+        this.fontFamily = fontFamily;
+    }
+}
+
 //ビューにビューモデルをバインド
 const vm = new ViewModel();
 vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
+vm.backgroundImage.subscribe(function(newValue){
+    changeBackgroundColorAlpha(".header", newValue !== null ? 0.9375 : 1.0);
+    changeBackgroundColorAlpha(".settings", newValue !== null ? 0.9375 : 1.0);
+    changeBackgroundColorAlpha(".main", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-column", newValue !== null ? 0.0 : 1.0);
+    changeBackgroundColorAlpha(".column_box", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".selected_column", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-column-projects-project", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo", newValue !== null ? 0.0 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-result", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-tasks-task", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-complete_task_button", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-complete_tasks", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-incomplete_tasks", newValue !== null ? 0.75 : 1.0);
+});
 ko.applyBindings(vm);
+
+//ヘッダーにヘッダー用ビューモデルをバインド
+const headViewModel = new HeadViewModel();
+ko.applyBindings(headViewModel, $("head")[0]);
 
 //ダークモードの設定
 const options = {
@@ -250,6 +313,9 @@ window.onload = function(){
         soundNum = (soundNum + 1) % 3;
         changeSound();
     });
+
+    //スキン初期設定
+    initSkin();
 
     //未完了タスク数の表示
     displayIncompleteTasks();
@@ -673,4 +739,149 @@ function readTaskFromRow(row){
     });
 
     return new Task(task_id, project, task_value, completetion_date, task_status);
+}
+
+//フォントファミリー変更(スキン設定)
+function changeFontFamily(context, event){
+    if(!event.originalEvent){
+        return true;
+    }
+    //スキン情報変更(フォントファミリー)
+    const fontFamily = event.target.value;
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                key: "font-family",
+                value: fontFamily,
+                todo: "updateSkin"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        if(data !== true){
+            alert("フォントを変更できません");
+            return;
+        }
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("フォントを変更できません\n" + e);
+    });
+    return true;
+}
+
+//CSSセレクタからCSSルールを取得する
+function getCssRules(selector){
+    let result = [];
+    const sheets = document.styleSheets;
+    for(const sheet of sheets){
+        let rules = null;
+        try{
+            rules = sheet.cssRules;
+        }catch(e){
+            continue;
+        }
+        for(const rule of rules){
+            if(rule.selectorText !== selector) continue;
+            result.push(rule);
+        }
+    }
+    return result;
+}
+
+//CSSセレクタの背景色透明度を設定する
+function changeBackgroundColorAlpha(selector, alpha){
+    const cssRules = getCssRules(selector);
+    for(const cssRule of cssRules){
+        const style = cssRule.style;
+        let color = style.backgroundColor;
+        //プレフィックスが"rgb"または"rgba"の場合のみ透過設定処理を行う
+        if(!color.startsWith('rgb(') && !color.startsWith('rgba(')){
+            continue;
+        }
+        //数字と","以外の文字を取り除いて、","で分割する
+        //例: rgb(255, 255, 255) → ["255", "255", "255"]
+        let rgba = color.replace(/[^\d,]/g, '').split(',');
+        if(rgba.length < 3){
+            continue;
+        }
+
+        if(rgba.length === 3){
+            rgba.push(alpha);
+        }else if(rgba.length === 4){
+            rgba[3] = alpha;
+        }
+        style.backgroundColor = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+    }
+}
+
+//背景画像変更(スキン設定)
+function updateBackgroundImage(imageData){
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                key: "background-image",
+                value: imageData,
+                todo: "updateSkin"
+            },
+            dataType: "json"
+        }
+    ).done(function(data){
+        if(data !== true){
+            alert("背景画像を変更できません");
+            return;
+        }
+        vm.backgroundImage(imageData);
+    }).fail(function(XMLHttpRequest, status, e){
+        alert("背景画像を変更できません\n" + e);
+    });
+}
+function changeBackgroundImage(object, event){
+    const reader = new FileReader();
+    reader.onload = function(e){
+        //スキン情報変更(背景画像)
+        updateBackgroundImage(e.target.result);
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+//スキン初期設定
+function initSkin(){
+    //プロジェクト一覧を表示
+    $.ajax("./post.php",
+        {
+            type: "POST",
+            data:{
+                todo: "selectSkin"
+            },
+            dataType: "json"
+        }
+    ).done(function(keyValueArray){
+        if(keyValueArray === null){
+            return;
+        }
+        let imageData = [];
+        for(const row of keyValueArray){
+            const key = row["key"];
+            const value = row["value"];
+            switch(key){
+                case "font-family":
+                    vm.selectedFontFamily(value);
+                    break;
+                case "image-file-max-size":
+                    vm.imageFileMaxSize(value);
+                    break;
+                case "background-image":
+                    imageData.push(value);
+                    break;
+            }
+        }
+        if(imageData.length>0){
+            vm.backgroundImage(imageData.join(''));
+        }
+        vm.displaySettingsIcon(true);
+    }).fail(function(XMLHttpRequest, status, e){
+        console.log("スキン初期設定できません\n" + e);
+    });
+    return true;
 }

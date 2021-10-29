@@ -16,6 +16,8 @@ i {
   background-color: #eee;
   border: solid 2px #777;
   box-sizing: border-box;
+  background-position: top center;
+  background-size: contain;
 }
 
 .header {
@@ -26,9 +28,14 @@ i {
   flex-direction: row;
   align-items: center;
 }
+.settings {
+  background-color: #fff;
+  border-bottom: solid 2px;
+}
 .main {
   display: flex;
   flex-direction: row;
+  background-color: #fff;
 }
 
 .main-column {
