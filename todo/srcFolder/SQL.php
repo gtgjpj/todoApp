@@ -303,5 +303,82 @@ EOF;
         $pdo = null;
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    //スキン情報取得
+    public static function selectSkin()
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = <<< EOF
+SELECT
+ `key`,
+ `value`
+FROM
+ `skin`
+ORDER BY
+ `key`,
+ `row_index`
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    //スキン情報更新
+    public static function updateSkin($key, $value)
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->beginTransaction();
+
+            //スキン情報削除
+            $sql = <<< EOF
+DELETE FROM
+ `skin`
+WHERE
+ `key` = :key
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':key' => $key));
+
+            //スキン情報登録
+            $sql = <<< EOF
+INSERT INTO
+ `skin`
+(
+ `key`,
+ `row_index`,
+ `value`
+)
+VALUES
+(
+ :key,
+ :row_index,
+ :value
+)
+ON DUPLICATE KEY UPDATE
+ `value` = :value
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $row_index = 0;
+            for($offset = 0; $offset < strlen($value); $offset += 65535) {
+                $stmt->execute(array(':key' => $key, ':row_index' => $row_index++, ':value' => substr($value, $offset, 65535)));
+            }
+
+            $pdo->commit();
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return true;
+    }
 }
 

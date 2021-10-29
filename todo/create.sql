@@ -13,3 +13,10 @@ create table `task`(
   `task_status` int(1),
   FOREIGN KEY `fk_project_id`(`project_id`) REFERENCES `project`(`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+create table `skin`(
+  `key` varchar(30) NOT NULL,
+  `row_index` int(11) NOT NULL,
+  `value` text,
+  PRIMARY KEY(`key`, `row_index`)
+);

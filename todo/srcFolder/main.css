@@ -21,6 +21,7 @@
 }
 .user {
   font-weight: bold;
+  width: 100%;
 }
 
 .column_box {
@@ -29,6 +30,7 @@
   display: flex;
   padding: 5px 0;
   align-items: center;
+  background-color: #fff;
 }
 
 .selected_column {
@@ -119,6 +121,12 @@
 .task_project_color {
   height: 30px;
 }
+.task_value {
+  width: 100%;
+}
+.task_date {
+  white-space: nowrap;
+}
 .main-todo-body-tasks-task {
   height: 40px;
   background-color: #fff;
@@ -198,4 +206,11 @@
 
 .hamburger {
   position: fixed;
+}
+
+.settings-icons {
+  vertical-align: middle;
+}
+.settings-background-image-file {
+  display: none;
 }

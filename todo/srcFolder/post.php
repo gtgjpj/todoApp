@@ -32,6 +32,12 @@ switch ($_POST['todo']) {
     case "selectIncompleteTasksCount":
         selectIncompleteTasksCount();
         break;
+    case "selectSkin":
+        selectSkin();
+        break;
+    case "updateSkin":
+        updateSkin();
+        break;
 }
 
 //タスクの完了状態変更
@@ -156,5 +162,45 @@ function selectIncompleteTasksCount()
     $data = array($todayCount, $tomorrowCount, $laterCount, $overCount);
     header("Content-type: application/json; charset=UTF-8");
     echo json_encode($data);
+    exit;
+}
+
+//最大画像ファイルサイズ取得(POST最大サイズより取得)
+function getImageFileMaxSize()
+{
+    //POST最大サイズを取得
+    $post_max_size = strtoupper(ini_get('post_max_size'));
+    $unit = $post_max_size[strlen($post_max_size) - 1];
+
+    //BASE64で画像ファイルデータを登録するため3/4にする
+    return intval(intval($post_max_size) * 3 / 4) . $unit;
+}
+
+//スキン情報取得
+function selectSkin()
+{
+    $rows = SQL::selectSkin();
+    if(is_array($rows)){
+        array_push($rows, array('key' => 'image-file-max-size', 'value' => getImageFileMaxSize()));
+    }
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($rows);
+    exit;
+}
+
+//スキン情報更新
+function updateSkin()
+{
+    if(!isset($_POST['key']) || !isset($_POST['value'])){
+        header("Content-type: application/json; charset=UTF-8");
+        echo json_encode(false);
+        exit;
+    }
+
+    //データの登録
+    $result = SQL::updateSkin($_POST['key'], $_POST['value']);
+
+    header("Content-type: application/json; charset=UTF-8");
+    echo json_encode($result);
     exit;
 }
