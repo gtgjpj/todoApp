@@ -343,6 +343,30 @@ window.onload = function(){
             }
         }
     });
+    //貼り付け時の機能
+    document.body.addEventListener("paste", event =>{
+        if(event.clipboardData === null){
+            console.log("event.clipboardData === null");
+            return;
+        }
+
+        //ファイルデータが存在するか確認する
+        let index = -1;
+        for(let i=0; i<event.clipboardData.types.length; i++){
+            if(event.clipboardData.types[i] !== "Files" ||
+               !event.clipboardData.items[i].type.startsWith("image")){
+                continue;
+            }
+            index = i;
+            break;
+        }
+        if(index === -1){
+            return;
+        }
+
+        //背景画像変更(スキン設定)
+        readBackgroundImage(event.clipboardData.items[index].getAsFile());
+    });
 }
 
 /**
@@ -837,12 +861,18 @@ function updateBackgroundImage(imageData){
     });
 }
 function changeBackgroundImage(object, event){
+    readBackgroundImage(event.target.files[0]);
+}
+function readBackgroundImage(file){
+    if(file === null){
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e){
         //スキン情報変更(背景画像)
         updateBackgroundImage(e.target.result);
     }
-    reader.readAsDataURL(event.target.files[0]);
+    reader.readAsDataURL(file);
 }
 
 //スキン初期設定
