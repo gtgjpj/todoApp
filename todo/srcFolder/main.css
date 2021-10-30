@@ -62,6 +62,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  background-color: #fff;
 }
 .main-column-projects-project i {
   margin: 0px 5px;

@@ -83,7 +83,7 @@ class ViewModel {
  
     //背景画像
     imageFileMaxSize = ko.observable('0');
-    backgroundImage = ko.observable(null);
+    backgroundImage = ko.observable('');
 
     //フォント
     availableFontFamilies = [
@@ -238,19 +238,18 @@ class FontFamily {
 const vm = new ViewModel();
 vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
 vm.backgroundImage.subscribe(function(newValue){
-    changeBackgroundColorAlpha(".header", newValue !== null ? 0.9375 : 1.0);
-    changeBackgroundColorAlpha(".settings", newValue !== null ? 0.9375 : 1.0);
-    changeBackgroundColorAlpha(".main", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-column", newValue !== null ? 0.0 : 1.0);
-    changeBackgroundColorAlpha(".column_box", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".selected_column", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-column-projects-project", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo", newValue !== null ? 0.0 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-result", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-tasks-task", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-complete_task_button", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-complete_tasks", newValue !== null ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-incomplete_tasks", newValue !== null ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".header", newValue !== '' ? 0.9375 : 1.0);
+    changeBackgroundColorAlpha(".settings", newValue !== '' ? 0.9375 : 1.0);
+    changeBackgroundColorAlpha(".main", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-column", newValue !== '' ? 0.0 : 1.0);
+    changeBackgroundColorAlpha(".column_box", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".selected_column", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-column-projects-project", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo", newValue !== '' ? 0.0 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-result", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-tasks-task", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-complete_task_button", newValue !== '' ? 0.75 : 1.0);
+    changeBackgroundColorAlpha(".main-todo-body-complete_tasks, .main-todo-body-incomplete_tasks", newValue !== '' ? 0.75 : 1.0);
 });
 ko.applyBindings(vm);
 
