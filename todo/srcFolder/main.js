@@ -42,6 +42,21 @@ const TASK_STATUS = { COMPLETED: 0, INCOMPLETE: 1 };
 const DEFAULT_PROJECT_COLOR = "#777777";
 //デフォルトフォントファミリー
 const DEFAULT_FONT_FAMILY = "unset";
+//背景色透過率設定(背景画像ありの場合)
+const BACKGROUND_COLOR_ALPHA = [
+    { selector: ".header", alpha: 0.9375 },
+    { selector: ".settings", alpha: 0.9375 },
+    { selector: ".main", alpha: 0.75 },
+    { selector: ".main-column", alpha: 0.0 },
+    { selector: ".column_box", alpha: 0.75 },
+    { selector: ".selected_column", alpha: 0.75, important: true },
+    { selector: ".main-column-projects-project", alpha: 0.75 },
+    { selector: ".main-todo", alpha: 0.0 },
+    { selector: ".main-todo-result", alpha: 0.75 },
+    { selector: ".main-todo-body-tasks-task", alpha: 0.75 },
+    { selector: ".main-todo-body-complete_task_button", alpha: 0.75 },
+    { selector: ".main-todo-body-complete_tasks, .main-todo-body-incomplete_tasks", alpha: 0.75 }
+];
 
 //ビューモデルクラス
 class ViewModel {
@@ -238,18 +253,14 @@ class FontFamily {
 const vm = new ViewModel();
 vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
 vm.backgroundImage.subscribe(function(newValue){
-    changeBackgroundColorAlpha(".header", newValue !== '' ? 0.9375 : 1.0);
-    changeBackgroundColorAlpha(".settings", newValue !== '' ? 0.9375 : 1.0);
-    changeBackgroundColorAlpha(".main", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-column", newValue !== '' ? 0.0 : 1.0);
-    changeBackgroundColorAlpha(".column_box", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".selected_column", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-column-projects-project", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo", newValue !== '' ? 0.0 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-result", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-tasks-task", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-complete_task_button", newValue !== '' ? 0.75 : 1.0);
-    changeBackgroundColorAlpha(".main-todo-body-complete_tasks, .main-todo-body-incomplete_tasks", newValue !== '' ? 0.75 : 1.0);
+    for(const item of BACKGROUND_COLOR_ALPHA){
+        //背景色透過率
+        const alpha = (newValue !== '') ? item.alpha : 1.0;
+        //CSSスタイル background-color に"!important"を追記するかどうか？
+        const important = ('important' in item) ? item.important : false;
+        //背景色透過率を変更する
+        changeBackgroundColorAlpha(item.selector, alpha, important);
+    }
 });
 ko.applyBindings(vm);
 
@@ -549,7 +560,8 @@ function inputProject(text){
 }
 
 //プロジェクトの色変更
-function changeProjectColor(project, event){
+function changeProjectColor(object, event){
+    const project = object instanceof Project ? object : vm.selectedColumn();
     const color = event.target.value;
     $.ajax("./post.php",
         {
@@ -812,7 +824,7 @@ function getCssRules(selector){
 }
 
 //CSSセレクタの背景色透明度を設定する
-function changeBackgroundColorAlpha(selector, alpha){
+function changeBackgroundColorAlpha(selector, alpha, important){
     const cssRules = getCssRules(selector);
     for(const cssRule of cssRules){
         const style = cssRule.style;
@@ -833,7 +845,8 @@ function changeBackgroundColorAlpha(selector, alpha){
         }else if(rgba.length === 4){
             rgba[3] = alpha;
         }
-        style.backgroundColor = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+        const options = important ? '!important' : '';
+        style.backgroundColor = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]}) ${options}`;
     }
 }
 

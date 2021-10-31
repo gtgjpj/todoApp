@@ -82,11 +82,19 @@
             </div>
             <div class="main-todo">
                 <div id="todo_title">
-                    <i class="material-icons darkmode-ignore" data-bind="
-                        css: { 'icon-column': selectedColumn() instanceof Column },
-                        style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' },
-                        text: selectedColumn() !== null ? selectedColumn().icon : ''"></i><span data-bind="
-                        text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"></span>
+                    <label data-bind="
+                        click: selectedColumn() instanceof Project ? function(){return true;} : function(){return false;}">
+                        <input type="color" class="color-picker" data-bind="
+                            css: {
+                                'color-picker' : !isMobile(),
+                                'color-picker-mobile' : isMobile()
+                            },
+                            value: selectedColumn() !== null ? selectedColumn().color : '',
+                            event: { change: changeProjectColor }"/>
+                        <i class="material-icons darkmode-ignore icon-column" data-bind="
+                            style: { color: selectedColumn() !== null ? selectedColumn().color : 'black' },
+                            text: selectedColumn() !== null ? selectedColumn().icon : ''"></i></label><span data-bind="
+                            text: selectedColumn() !== null ? selectedColumn().name : 'プロジェクト未選択'"/>
                 </div>
                 <div class="main-todo-result" data-bind="style: { marginLeft: isMobile() ? '0px' : '30px', width: isMobile() ? '100%' : '500px'}">
                     <div class="main-todo-result-incomplete" data-bind="style: { marginLeft: isMobile() ? '20%' : '130px'}">

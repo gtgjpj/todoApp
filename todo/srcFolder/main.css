@@ -34,7 +34,7 @@
 }
 
 .selected_column {
-  background-color: #a8ffc0;
+  background-color: #a8ffc0 !important;
 }
 
 .icon-column {
@@ -43,6 +43,7 @@
   left: 0px;
   position: relative;
   transform: scale(1.4);
+  vertical-align: middle;
 }
 
 .counts {
