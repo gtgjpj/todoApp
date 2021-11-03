@@ -18,7 +18,10 @@
             backgroundImage: backgroundImage() !== null ? 'url(' + backgroundImage() + ')' : 'none',
             'font-family': selectedFontFamily() }">
         <div class="header">
-            <i class="icon-person material-icons">person</i>
+            <i class="material-icons" data-bind="
+                click: isMobile() ? function(){displayColumn(!displayColumn());return true;} : function(){return true},
+                css: isMobile() ? 'hamburger' : 'icon-person',
+                text: isMobile() ? 'menu' : 'person'"></i>
             <p class="user">みんまるたすく ver1.7.0</p>
             <i class="icon-settings material-icons" data-bind="
                 click: function(){displaySettings(!displaySettings())},
@@ -46,7 +49,6 @@
             <i class="material-icons settings-icons" data-bind="click: function(){updateBackgroundImage('')}">delete</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
-            <i class="material-icons hamburger" data-bind="visible: isMobile, click: function(){displayColumn(!displayColumn())}">menu</i>
             <div class="main-column" data-bind="visible: displayColumn">
                 <div data-bind="foreach: columns">
                     <div class="column_box" data-bind="click: displayTasks, css: { selected_column: $root.selectedColumn() === $data }">

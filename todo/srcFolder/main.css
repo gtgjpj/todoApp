@@ -207,7 +207,11 @@
 }
 
 .hamburger {
-  position: fixed;
+  position: relative;
+  top: 0px;
+  left: 20px;
+  transform: scale(1.5);
+  margin-right: 40px;
 }
 
 .settings-icons {
