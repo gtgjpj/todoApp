@@ -2,6 +2,8 @@
 
 include_once("./config/DB.php");
 
+define('BACKGROUND_IMAGE_HEADER_DATA', 'data:');
+
 class SQL
 {
     //プロジェクトのINSERT
@@ -310,15 +312,78 @@ EOF;
         try {
             $pdo = new PDO(DB::dsn, DB::username, DB::password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            //MySQL/MariaDB GROUP_CONCAT()関数の許可する最大結果長を変更
+            // https://dev.mysql.com/doc/refman/5.6/ja/server-system-variables.html#sysvar_group_concat_max_len
+            if ($pdo->query("SET SESSION group_concat_max_len = 4294967295") === false) {
+                die();
+            }
+
+            //スキン情報取得(背景画像データハッシュ以外)
             $sql = <<< EOF
 SELECT
  `key`,
  `value`
 FROM
  `skin`
+WHERE
+ `key` <> 'background-image'
 ORDER BY
  `key`,
  `row_index`
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $array = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            //スキン情報取得(背景画像データハッシュのみ)
+            //SHA256ハッシュ値をフロントエンドへ返すことにより、
+            //背景画像が変更されたかどうか判定できるようにする
+            $sql = <<< EOF
+SELECT
+ 'background-image-hash' AS `key`,
+ SHA2(GROUP_CONCAT(`value` ORDER BY `row_index` SEPARATOR ''), 256) AS `value`
+FROM
+ `skin`
+WHERE
+ `key` = 'background-image'
+GROUP BY
+ `key`
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $array = array_merge($array, $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (PDOException $e) {
+            die();
+        }
+
+        $pdo = null;
+        return $array;
+    }
+
+    //背景画像取得(スキン)
+    public static function getBackgroundImage()
+    {
+        try {
+            $pdo = new PDO(DB::dsn, DB::username, DB::password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            //DBシステム変数設定(当セッションのみ)
+            //MySQL/MariaDB GROUP_CONCAT()関数の許可する最大結果長を変更
+            // https://dev.mysql.com/doc/refman/5.6/ja/server-system-variables.html#sysvar_group_concat_max_len
+            if ($pdo->query("SET SESSION group_concat_max_len = 4294967295") === false) {
+                //結果 (DBシステム変数設定失敗)
+                return null;
+            }
+            $sql = <<< EOF
+SELECT
+ GROUP_CONCAT(`value` ORDER BY `row_index` SEPARATOR '') AS `value`
+FROM
+ `skin`
+WHERE
+ `key` = 'background-image'
+GROUP BY
+ `key`
 EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
@@ -327,7 +392,49 @@ EOF;
         }
 
         $pdo = null;
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $array = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (empty($array)) {
+            //結果 (データなし)
+            return null;
+        }
+
+        //65535文字毎に分割されているデータ文字列を連結する
+        $data = implode("", $array);
+        if (strlen($data) <= 0) {
+            //結果 (データなし)
+            return null;
+        }
+
+        //この行以降の処理は
+        // https://developer.mozilla.org/ja/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+        //に基づいて処理を行う
+ 
+        //先頭が"data:"となっているか？
+        //注:str_starts_with()関数(PHP8～)がPHP7ではサポートされていないためsubstrを用いる
+        // if (!str_starts_with($data, BACKGROUND_IMAGE_HEADER_DATA)) {
+        if (substr($data, 0, strlen(BACKGROUND_IMAGE_HEADER_DATA)) !== BACKGROUND_IMAGE_HEADER_DATA) {
+            //結果 (無効データ)
+            return null;
+        }
+
+        //","(カンマ)で文字列分割して配列要素が2になっているかどうか？
+        $array = explode(",", $data);
+        if (count($array) !== 2) {
+            //結果 (無効データ)
+            return null;
+        }
+
+        //ヘッダー文字列分割
+        $header = explode(";", $array[0]);
+        if (count($header) !== 1 && count($header) !== 2) {
+            //結果 (ヘッダーデータ不良)
+            return null;
+        }
+
+        //メディア(MIME)タイプ・画像データ取得 (BASE64文字列=>バイナリ変換)
+        return array(
+            'mediatype' => substr($header[0], strlen(BACKGROUND_IMAGE_HEADER_DATA)),
+            'data' => base64_decode($array[1]));
     }
 
     //スキン情報更新
@@ -347,6 +454,12 @@ WHERE
 EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':key' => $key));
+
+            //$value変数がブランクの場合はINSERT文を実行しない
+            if ($value === null || strlen($value) <= 0) {
+                $pdo->commit();
+                return array('result' => true, 'hash' => null);
+            }
 
             //スキン情報登録
             $sql = <<< EOF
@@ -378,7 +491,7 @@ EOF;
         }
 
         $pdo = null;
-        return true;
+        return array('result' => true, 'hash' => hash('sha256', $value));
     }
 }
 

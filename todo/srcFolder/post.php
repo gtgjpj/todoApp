@@ -3,6 +3,18 @@
 include_once('./config/DB.php');
 include_once('./SQL.php');
 
+//GETパラメータ確認 (背景画像データ取得の場合のみ)
+if (isset($_GET['todo']) && $_GET['todo'] === 'background-image') {
+    $result = SQL::getBackGroundImage();
+    if ($result === null) {
+        die();
+    }
+    header("Content-type: ${result['mediatype']}");
+    header("Expires: Fri, 31 Dec 9999 23:59:59 GMT");
+    echo $result['data'];
+    exit;
+}
+
 //Ajaxで送られたtodoパラメータに応じた処理を行う
 switch ($_POST['todo']) {
     case "insertProject":
