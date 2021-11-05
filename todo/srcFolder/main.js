@@ -475,6 +475,8 @@ function clickTaskStatus(task){
     const project_id = (vm.selectedColumn() instanceof Project) ? vm.selectedColumn().id : null;
     //タスクを完了状態にしたときのみ効果音を鳴らす
     if(!task.isCompleted && soundNum !== 0){
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
         sound.play();
     }
     //Ajax
