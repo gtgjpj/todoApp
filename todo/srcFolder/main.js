@@ -98,7 +98,7 @@ class ViewModel {
  
     //背景画像
     imageFileMaxSize = ko.observable('0');
-    backgroundImage = ko.observable('');
+    backgroundImageHash = ko.observable(null);
 
     //フォント
     availableFontFamilies = [
@@ -252,10 +252,10 @@ class FontFamily {
 //ビューにビューモデルをバインド
 const vm = new ViewModel();
 vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
-vm.backgroundImage.subscribe(function(newValue){
+vm.backgroundImageHash.subscribe(function(newValue){
     for(const item of BACKGROUND_COLOR_ALPHA){
         //背景色透過率
-        const alpha = (newValue !== '') ? item.alpha : 1.0;
+        const alpha = (newValue !== null) ? item.alpha : 1.0;
         //CSSスタイル background-color に"!important"を追記するかどうか？
         const important = ('important' in item) ? item.important : false;
         //背景色透過率を変更する
@@ -794,7 +794,7 @@ function changeFontFamily(context, event){
             dataType: "json"
         }
     ).done(function(data){
-        if(data !== true){
+        if(data === null || data["result"] !== true){
             alert("フォントを変更できません");
             return;
         }
@@ -863,11 +863,11 @@ function updateBackgroundImage(imageData){
             dataType: "json"
         }
     ).done(function(data){
-        if(data !== true){
+        if(data === null || data["result"] !== true){
             alert("背景画像を変更できません");
             return;
         }
-        vm.backgroundImage(imageData);
+        vm.backgroundImageHash(data["hash"]);
     }).fail(function(XMLHttpRequest, status, e){
         alert("背景画像を変更できません\n" + e);
     });
@@ -902,7 +902,6 @@ function initSkin(){
         if(keyValueArray === null){
             return;
         }
-        let imageData = [];
         for(const row of keyValueArray){
             const key = row["key"];
             const value = row["value"];
@@ -913,13 +912,10 @@ function initSkin(){
                 case "image-file-max-size":
                     vm.imageFileMaxSize(value);
                     break;
-                case "background-image":
-                    imageData.push(value);
+                case "background-image-hash":
+                    vm.backgroundImageHash(value);
                     break;
             }
-        }
-        if(imageData.length>0){
-            vm.backgroundImage(imageData.join(''));
         }
         vm.displaySettingsIcon(true);
     }).fail(function(XMLHttpRequest, status, e){

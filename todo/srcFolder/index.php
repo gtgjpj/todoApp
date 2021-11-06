@@ -15,7 +15,7 @@
 <body data-bind="style: { width: isMobile() ? '100%' : '800px', margin: isMobile() ? '0' : '8px' }">
     <div class="bodyDiv" data-bind="
         style: {
-            backgroundImage: backgroundImage() !== null ? 'url(' + backgroundImage() + ')' : 'none',
+            backgroundImage: backgroundImageHash() !== null ? `url(./post.php?todo=background-image&hash=${backgroundImageHash()})` : 'unset',
             'font-family': selectedFontFamily() }">
         <div class="header">
             <i class="material-icons" data-bind="
@@ -46,7 +46,7 @@
                 <span data-bind="text: `MAX:${imageFileMaxSize()}B`"></span>
                 <input type="file" class="settings-background-image-file" accept="image/*" data-bind="event: { change: changeBackgroundImage }"/>
             </label>
-            <i class="material-icons settings-icons" data-bind="click: function(){updateBackgroundImage('')}">delete</i>
+            <i class="material-icons settings-icons" data-bind="click: function(){updateBackgroundImage(null)}">delete</i>
         </div>
         <div class="main" data-bind="style: { height: isMobile() ? 'auto' : '450px'}">
             <div class="main-column" data-bind="visible: displayColumn">
