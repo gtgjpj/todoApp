@@ -21,9 +21,9 @@ entity task as "task\nタスク" {
 
 entity skin as "skin\nスキン" {
   * key [キー] : varchar(30)
-  * row_index [行インデックス] : varchar(30)
+  * row_index [行インデックス] : int(11)
   --
-  value [値]
+  value [値] : text
 }
 note bottom
   key:
