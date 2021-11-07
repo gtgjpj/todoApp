@@ -1,41 +1,48 @@
 @startuml
 class ViewModel {
   +columns : Column[]
-  +projects : ko.observableArray
-  +incompleteTasks : ko.observableArray
-  +completedTasks : ko.observableArray
-  +displayColumn : ko.observable
-  +isMobile : ko.observable
-  +openCompleteTaskFlag : ko.observable
-  +selectedColumn : ko.observable
-  +renameProject : ko.observable
+  {field} +projects : ko.observableArray(Project)
+  {field} +incompleteTasks : ko.observableArray(Task)
+  {field} +completedTasks : ko.observableArray(Task)
+  {field} +displayColumn : ko.observable(Boolean)
+  {field} +isMobile : ko.observable(Boolean)
+  {field} +openCompleteTaskFlag : ko.observable(Number)
+  {field} +selectedColumn : ko.observable(AbstractColumn)
+  {field} +renameProject : ko.observable(Project)
+  {field} +displaySettings : ko.observable(Boolean)
+  {field} +displaySettingsIcon : ko.observable(Boolean)
+  {field} +imageFileMaxSize : ko.observable(String)
+  {field} +backgroundImageHash : ko.observable(String)
+  +availableFontFamilies : FontFamily[]
+  {field} +selectedFontFamily : ko.observable(String)
 }
-ViewModel o-- Project
-ViewModel o-- Column
+
 class AbstractColumn {
-  +name : ko.observable
-  +color : ko.observable
+  {field} +name : ko.observable(String)
+  {field} +color : ko.observable(String)
   +icon : String
-  +nameHtml() : String
+  +get projectId() : Number
+  +get completetionDateRangeStart() : String
+  +get completetionDateRangeEnd() : String
+  +get taskStatus() : Number
 }
+
 class Project {
   +id : Number
-  +iconHtml() : String
   +get projectId() : Number
 }
-AbstractColumn <|-- Project
+
 class Column {
   -completetionDateRangeStart : Number
   -completetionDateRangeEnd : Number
   -taskStatus : Number
-  +countIncompleteTasks : ko.observable
-  +iconHtml() : String
-  -daysLaterToDateStr(daysLater)
-  +get completetionDateRangeStart()
-  +get completetionDateRangeEnd()
-  +get taskStatus()
+  {field} +countIncompleteTasks : ko.observable(Number)
+  +daysLaterToDateStr(daysLater) : String
+  +get completetionDateRangeStart() : String
+  +get completetionDateRangeEnd() : String
+  +get taskStatus() : Number
 }
-AbstractColumn <|-- Column
+
 class Task {
   +id : Number
   +project : Project
@@ -45,5 +52,20 @@ class Task {
   +get isCompleted() : Boolean
   +get isExpired() : Boolean
 }
+
+class HeadViewModel {
+  {field} +fontFamilyHref : ko.computed(String)
+}
+
+class FontFamily {
+  +name : String
+  +fontFamily : String
+}
+
+AbstractColumn <|-- Column
+AbstractColumn <|-- Project
+ViewModel o-- Column
+ViewModel o-- Project
 ViewModel o-- Task
+ViewModel o-- FontFamily
 @enduml

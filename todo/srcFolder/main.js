@@ -177,7 +177,7 @@ class Column extends AbstractColumn {
         this.#taskStatus = taskStatus;
     }
 
-    //daysLater日後の日付文字列を取得する(プライベートメソッド)
+    //daysLater日後の日付文字列を取得する
     daysLaterToDateStr(daysLater){
         if(daysLater === null || typeof(daysLater)!= "number") return null;
         const d = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * daysLater));
@@ -227,7 +227,7 @@ class Task{
     }
 }
 
-//ヘッダー用ビューモデルクラス
+//<head>用ビューモデルクラス
 class HeadViewModel {
     //フォントファミリー(Google Fonts読み込み用)
     fontFamilyHref = ko.computed(function(){
@@ -264,7 +264,7 @@ vm.backgroundImageHash.subscribe(function(newValue){
 });
 ko.applyBindings(vm);
 
-//ヘッダーにヘッダー用ビューモデルをバインド
+//ヘッダーに<head>用ビューモデルをバインド
 const headViewModel = new HeadViewModel();
 ko.applyBindings(headViewModel, $("head")[0]);
 

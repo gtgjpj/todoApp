@@ -1,0 +1,35 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity project as "project\nプロジェクト" {
+  * project_id [ID] : int(11) <<generated>>
+  --
+  project_name [名称] : varchar(30)
+  project_status [ステータス] : int(1)
+  color [ラベル色] : varchar(30)
+}
+
+entity task as "task\nタスク" {
+  * task_id [ID] : int(11) <<generated>>
+  --
+  * project_id [プロジェクトID] : int(11) <<FK>>
+  task_value [内容] : varchar(30)
+  completetion_date [期限] : date
+  task_status [ステータス] : int(1)
+}
+
+entity skin as "skin\nスキン" {
+  * key [キー] : varchar(30)
+  * row_index [行インデックス] : int(11)
+  --
+  value [値] : text
+}
+note bottom
+  key:
+  * background-image
+  * font-family
+end note
+
+project ||-d-o{ task
+@enduml
