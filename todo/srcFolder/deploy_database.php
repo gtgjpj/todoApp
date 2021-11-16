@@ -161,7 +161,7 @@ $pdo = null;
     echo '-- =&gt; ' . $result['datetime']
         . ' ** ' . ($result['result'] ? '成功' : '失敗') . ' **' . PHP_EOL;
     if ($result['message'] !== null) {
-        echo '-- ' . $result['message'] . PHP_EOL;
+        echo '-- ' . htmlspecialchars($result['message']) . PHP_EOL;
     }
     echo PHP_EOL;
 } ?>
