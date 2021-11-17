@@ -17,14 +17,16 @@ class SQL
 INSERT INTO
  `project`
 (
+ `owner_user_id`,
  `project_name`,
  `project_status`
 )
-VALUES
-(
+SELECT
+ MIN(`user_id`),
  :name,
  1
-)
+FROM
+ `user`
 EOF;
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array(':name' => $name));
@@ -466,18 +468,18 @@ EOF;
 INSERT INTO
  `skin`
 (
+ `user_id`,
  `key`,
  `row_index`,
  `value`
 )
-VALUES
-(
+SELECT
+ MIN(`user_id`),
  :key,
  :row_index,
  :value
-)
-ON DUPLICATE KEY UPDATE
- `value` = :value
+FROM
+ `user`
 EOF;
             $stmt = $pdo->prepare($sql);
             $row_index = 0;

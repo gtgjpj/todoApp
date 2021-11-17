@@ -2,12 +2,33 @@
 hide circle
 skinparam linetype ortho
 
+entity user as "user\nユーザー" {
+  * user_id [ID] : int(11) <<generated>>
+  --
+  * user_name [ログインユーザー名] : varchar(30) <<unique>>
+  password_hash [ログインパスワードハッシュ] : char(64)
+  * display_name [表示名称] : varchar(30)
+  * is_available [ログイン可/不可] : boolean
+  * created_datetime [作成日時] : datetime
+  password_updated_datetime [パスワード更新日時] : datetime
+}
+note left
+  password_hash:
+  * ログインパスワードのSHA256ハッシュ値
+  * NULLの場合はパスワード設定が必要
+end note
+
 entity project as "project\nプロジェクト" {
   * project_id [ID] : int(11) <<generated>>
   --
+  * owner_user_id [所有者ユーザーID] : int(11) <<FK>>
+  * is_private [所有者のみ閲覧可/公開] : boolean
   project_name [名称] : varchar(30)
   project_status [ステータス] : int(1)
   color [ラベル色] : varchar(30)
+  * created_datetime [作成日時] : datetime
+  name_updated_datetime [名称更新日時] : datetime
+  status_updated_datetime [ステータス更新日時] : datetime
 }
 
 entity task as "task\nタスク" {
@@ -17,19 +38,67 @@ entity task as "task\nタスク" {
   task_value [内容] : varchar(30)
   completetion_date [期限] : date
   task_status [ステータス] : int(1)
+  * created_datetime [作成日時] : datetime
+  value_updated_datetime [内容更新日時] : datetime
+  status_updated_datetime [ステータス更新日時] : datetime
 }
 
 entity skin as "skin\nスキン" {
-  * key [キー] : varchar(30)
-  * row_index [行インデックス] : int(11)
+  * skin_id [ID] : bigint <<generated>>
   --
-  value [値] : text
+  * user_id [ユーザーID] : int(11) <<unique>> <<FK>>
+  * key [キー] : varchar(30) <<unique>>
+  * row_index [行インデックス] : int(11) <<unique>>
+  * value [値] : text
 }
 note bottom
   key:
   * background-image
+  * background-image-hash
   * font-family
+  * user-icon-image
+  * user-icon-image-hash
 end note
 
+entity session as "session\nセッション" {
+  * session_id [ID] : bigint <<generated>>
+  --
+  * user_id [ユーザーID] : int(11) <<FK>>
+  * created_datetime [作成日時] : datetime
+}
+
+entity notification as "notification\nトップページお知らせ" {
+  * notification_id [ID] : int(11) <<generated>>
+  --
+  * notification_text [内容] : text
+  * created_datetime [作成日時] : datetime
+  text_updated_datetime [内容更新日時] : datetime
+}
+
+entity user_notification as "user_notification\nユーザー通知" {
+  * user_notification_id [ID] : bigint <<generated>>
+  --
+  * user_id [ユーザーID] : int(11) <<FK>>
+  * notification_text [内容] : text
+  * created_datetime [作成日時] : datetime
+  text_updated_datetime [内容更新日時] : datetime
+  * is_read [既読/未読] : boolean
+}
+
+entity task_reaction as "task_reaction\nタスクに対するリアクション" {
+  * task_reaction_id [ID] : bigint
+  --
+  * task_id [タスクID] : int(11) <<unique>> <<FK>>
+  * user_id [ユーザーID] : int(11) <<unique>> <<FK>>
+  * material_icon [アイコン] : varchar(64) <<unique>>
+  * created_datetime [作成日時] : datetime
+}
+
+user ||-u-o{ user_notification
+user ||-r-o{ session
+user ||-d-o{ project
+user ||-d-o{ skin
 project ||-d-o{ task
+user ||-d-o{ task_reaction
+task ||-l-o{ task_reaction
 @enduml
