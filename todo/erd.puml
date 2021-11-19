@@ -86,7 +86,7 @@ entity user_notification as "user_notification\nユーザー通知" {
 }
 
 entity task_reaction as "task_reaction\nタスクに対するリアクション" {
-  * task_reaction_id [ID] : bigint
+  * task_reaction_id [ID] : bigint <<generated>>
   --
   * task_id [タスクID] : int(11) <<unique>> <<FK>>
   * user_id [ユーザーID] : int(11) <<unique>> <<FK>>
