@@ -712,26 +712,26 @@ EOF;
 
     //タスクに対するリアクションテーブル作成
     $sql = <<< EOF
--- task_reactionテーブル作成
+-- user_reactionテーブル作成
 CREATE TABLE
-  `task_reaction`
+  `user_reaction`
 (
-  `task_reaction_id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  `user_reaction_id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
   `task_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `material_icon` varchar(64) NOT NULL,
   `created_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `uk_task_reaction`(`task_id`, `user_id`, `material_icon`),
-  FOREIGN KEY `fk_task_reaction_task_id`(`task_id`)
+  UNIQUE KEY `uk_user_reaction`(`task_id`, `user_id`, `material_icon`),
+  FOREIGN KEY `fk_user_reaction_task_id`(`task_id`)
     REFERENCES `task`(`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY `fk_task_reaction_user_id`(`user_id`)
+  FOREIGN KEY `fk_user_reaction_user_id`(`user_id`)
     REFERENCES `user`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 EOF;
-    if (!existsTable('task_reaction')) {
+    if (!existsTable('user_reaction')) {
         execute($sql);
     } else {
-        skipExecute($sql, '`task_reaction`テーブル がすでに存在するためスキップしました');
+        skipExecute($sql, '`user_reaction`テーブル がすでに存在するためスキップしました');
     }
 }
 

@@ -85,8 +85,8 @@ entity user_notification as "user_notification\nユーザー通知" {
   * is_read [既読/未読] : boolean
 }
 
-entity task_reaction as "task_reaction\nタスクに対するリアクション" {
-  * task_reaction_id [ID] : bigint <<generated>>
+entity user_reaction as "user_reaction\nタスクに対するリアクション" {
+  * user_reaction_id [ID] : bigint <<generated>>
   --
   * task_id [タスクID] : int(11) <<unique>> <<FK>>
   * user_id [ユーザーID] : int(11) <<unique>> <<FK>>
@@ -99,6 +99,6 @@ user ||-r-o{ session
 user ||-d-o{ project
 user ||-d-o{ skin
 project ||-d-o{ task
-user ||-d-o{ task_reaction
-task ||-l-o{ task_reaction
+user ||-d-o{ user_reaction
+task ||-l-o{ user_reaction
 @enduml
