@@ -1,14 +1,18 @@
 @startuml
 class ViewModel {
+  .. Column / Project ..
+  {field} +displayColumn : ko.observable(Boolean)
   +columns : Column[]
   {field} +projects : ko.observableArray(Project)
-  {field} +incompleteTasks : ko.observableArray(Task)
-  {field} +completedTasks : ko.observableArray(Task)
-  {field} +displayColumn : ko.observable(Boolean)
-  {field} +isMobile : ko.observable(Boolean)
-  {field} +openCompleteTaskFlag : ko.observable(Number)
   {field} +selectedColumn : ko.observable(AbstractColumn)
   {field} +renameProject : ko.observable(Project)
+  .. Task ..
+  {field} +incompleteTasks : ko.observableArray(Task)
+  {field} +completedTasks : ko.observableArray(Task)
+  {field} +openCompleteTaskFlag : ko.observable(Number)
+  .. Environment ..
+  {field} +isMobile : ko.observable(Boolean)
+  .. User Setting ..
   {field} +displaySettings : ko.observable(Boolean)
   {field} +displaySettingsIcon : ko.observable(Boolean)
   {field} +imageFileMaxSize : ko.observable(String)
