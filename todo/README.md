@@ -14,31 +14,30 @@ ver1.5.0にて魔王魂様(https://maou.audio/) よりお借りした効果音�
 
 階層はそのままにご利用ください。
 
-1. srcFolder:ソースコードが複数入ったフォルダ
-2. DB.php:
-3. DB 設計.txt:必要なテーブルと、その設定を記載してあります。
-   　命令文が記載してある為、該当データベースにて使用してください
-4. base.css:スタイルシートの一つになります
+1. base.css:スタイルシートの一つになります
+2. class.puml:PlantUML で記述したクラス図になります
+3. erd.puml:PlantUML で記述したER図になります
+4. knockout-3.5.1.js:MVVM 実装に用いております JavaScript ライブラリとなります
 5. jquery-3.5.1.min.js:jQuery の minify ファイルになります
-6. deploy_database.php:データベース内のテーブル作成・更新を行います。当アプリの最新バージョンへ更新した際はWebブラウザで deploy_database.php へアクセスしてください。
+6. srcFolder フォルダ:みんまるたすくの主要機能を実装したファイルが入っております
 
 #### srcFolder フォルダの中身について
 
 1. SQL.php:使用する SQL 文をまとめた PHP ファイルです
-2. index.php:メインページになります
-3. main.css:スタイルシートの一つになります
-4. main.js:Javascript コードです
-5. post.php:非同期通信時に用いるコードになります
-6. configフォルダ:DB接続設定が書かれたファイルが入っております
-7. deploy_database.php:データベース内のテーブル作成・更新を行うコードになります
+2. deploy_database.php:データベース内のテーブル作成・更新を行います。<br />当アプリを最新バージョンへ更新した際は、あらかじめ下記の config/DB.php を準備して頂いた上でWebブラウザで deploy_database.php へアクセスしてください。
+3. index.php:メインページになります
+4. main.css:スタイルシートの一つになります
+5. main.js:Javascript コードです
+6. post.php:非同期通信時に用いるコードになります
+7. configフォルダ:DB接続設定が書かれたファイルが入っております
 
 #### config フォルダの中身について
 
-1.DB-example.php:PHP でデータベース接続時に用いるファイルの型。  
-   各環境（MySQL など）の設定に合わせて変更をお願いします（XAMPP の初期値をベースにしてあります）  
-   dsn:データベース名指定、ホスト名、ポート名  
-   username:データベースのユーザ名  
-   password:ユーザに該当するパスワード
+1.DB-example.php:PHP でデータベース接続時に用いるファイルの型。<br />各環境（MySQL など）の設定に合わせて変更をお願いします（XAMPP の初期値をベースにしてあります）  
+   * dsn:データベース名指定、ホスト名、ポート名  
+   * username:データベースのユーザ名  
+   * password:ユーザに該当するパスワード
+
    **※必ずDB.phpへリネームしてご利用ください**
    
 ### 使用ライブラリ等  
