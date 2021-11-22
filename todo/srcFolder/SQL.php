@@ -17,6 +17,33 @@ class SQL
 INSERT INTO
  `project`
 (
+ `owner_user_id`,
+ `project_name`,
+ `project_status`
+)
+SELECT
+ MIN(`user_id`),
+ :name,
+ 1
+FROM
+ `user`
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':name' => $name));
+            $project_id = $pdo->lastInsertId();
+        } catch (PDOException $e) {
+            //MySQL/MariaDB 例外コード確認
+            // https://dev.mysql.com/doc/refman/5.6/ja/error-messages-server.html
+            // 42S02: Base table or view not found: 1146 Table 'xxxx.user' doesn't exist
+            if ($pdo === null || $e->getCode() !== '42S02') {
+                die();
+            }
+
+            try {
+                $sql = <<< EOF
+INSERT INTO
+ `project`
+(
  `project_name`,
  `project_status`
 )
@@ -26,11 +53,13 @@ VALUES
  1
 )
 EOF;
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute(array(':name' => $name));
-            $project_id = $pdo->lastInsertId();
-        } catch (PDOException $e) {
-            die();
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(array(':name' => $name));
+                $project_id = $pdo->lastInsertId();
+            }
+            catch (PDOException $e) {
+                die();
+            }
         }
 
         $pdo = null;
@@ -466,6 +495,62 @@ EOF;
 INSERT INTO
  `skin`
 (
+ `user_id`,
+ `key`,
+ `row_index`,
+ `value`
+)
+SELECT
+ MIN(`user_id`),
+ :key,
+ :row_index,
+ :value
+FROM
+ `user`
+EOF;
+            $stmt = $pdo->prepare($sql);
+            $row_index = 0;
+            for($offset = 0; $offset < strlen($value); $offset += 65535) {
+                $stmt->execute(array(':key' => $key, ':row_index' => $row_index++, ':value' => substr($value, $offset, 65535)));
+            }
+
+            $pdo->commit();
+        } catch (PDOException $e) {
+            //MySQL/MariaDB 例外コード確認
+            // https://dev.mysql.com/doc/refman/5.6/ja/error-messages-server.html
+            // 42S02: Base table or view not found: 1146 Table 'xxxx.user' doesn't exist
+            if ($pdo === null || $e->getCode() !== '42S02') {
+                die();
+            }
+
+            try {
+                if ($pdo->inTransaction()) {
+                    // 一旦、ロールバックを行い別のSQLで再試行する
+                    $pdo->rollBack();
+                }
+                $pdo->beginTransaction();
+
+                //スキン情報削除
+                $sql = <<< EOF
+DELETE FROM
+ `skin`
+WHERE
+ `key` = :key
+EOF;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(array(':key' => $key));
+
+                //$value変数がブランクの場合はINSERT文を実行しない
+                if ($value === null || strlen($value) <= 0) {
+                    $pdo->commit();
+                    return array('result' => true, 'hash' => null);
+                }
+
+                //スキン情報登録
+                $sql = <<< EOF
+INSERT INTO
+ `skin`
+(
  `key`,
  `row_index`,
  `value`
@@ -476,18 +561,17 @@ VALUES
  :row_index,
  :value
 )
-ON DUPLICATE KEY UPDATE
- `value` = :value
 EOF;
-            $stmt = $pdo->prepare($sql);
-            $row_index = 0;
-            for($offset = 0; $offset < strlen($value); $offset += 65535) {
-                $stmt->execute(array(':key' => $key, ':row_index' => $row_index++, ':value' => substr($value, $offset, 65535)));
-            }
+                $stmt = $pdo->prepare($sql);
+                $row_index = 0;
+                for($offset = 0; $offset < strlen($value); $offset += 65535) {
+                    $stmt->execute(array(':key' => $key, ':row_index' => $row_index++, ':value' => substr($value, $offset, 65535)));
+                }
 
-            $pdo->commit();
-        } catch (PDOException $e) {
-            die();
+                $pdo->commit();
+            } catch (PDOException $e) {
+                die();
+            }
         }
 
         $pdo = null;
