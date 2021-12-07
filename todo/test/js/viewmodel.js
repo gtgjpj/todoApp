@@ -26,20 +26,20 @@
     it('test project', function(){
         const project = new Project(1, 'テストProject', '#777777');
         assert(project.id === 1);
-        assert(project.name === 'テストProject');
+        assert(project.name() === 'テストProject');
         assert(project.color() === '#777777');
     });
 
     it('test viewmodel projects', function(){
         const viewModel = new ViewModel();
-        assert(viewModel.projects.length === 0);
+        assert(viewModel.column.projects.length === 0);
 
         const project = new Project(1, 'テストProject', '#777777');
-        viewModel.projects.push(project);
-        assert(viewModel.projects().length === 1);
+        viewModel.column.projects.push(project);
+        assert(viewModel.column.projects().length === 1);
 
-        viewModel.projects.removeAll();
-        assert(viewModel.projects().length === 0);
+        viewModel.column.projects.removeAll();
+        assert(viewModel.column.projects().length === 0);
     });
 
     it('test task', function(){
@@ -47,7 +47,7 @@
         const task = new Task(1, project, 'テストTask', '2021-09-22', 3);
         assert(task.id === 1);
         assert(task.project.id === 2);
-        assert(task.project.name === 'テストProject');
+        assert(task.project.name() === 'テストProject');
         assert(task.project.color() === '#777777');
         assert(task.value === 'テストTask');
         assert(task.completetionDate === '2021-09-22');
@@ -56,25 +56,25 @@
 
     it('test viewmodel tasks', function(){
         const viewModel = new ViewModel();
-        assert(viewModel.incompleteTasks().length === 0);
-        assert(viewModel.completedTasks().length === 0);
+        assert(viewModel.task.incompleteTasks().length === 0);
+        assert(viewModel.task.completedTasks().length === 0);
 
         const project = new Project(2, 'テストProject', '#777777');
         const task = new Task(1, project, 'テストTask', '2021-09-22', 1);
-        viewModel.incompleteTasks.push(task);
-        assert(viewModel.incompleteTasks().length === 1);
-        assert(viewModel.completedTasks().length === 0);
+        viewModel.task.incompleteTasks.push(task);
+        assert(viewModel.task.incompleteTasks().length === 1);
+        assert(viewModel.task.completedTasks().length === 0);
 
         task.status = 0;
-        viewModel.incompleteTasks.remove(task);
-        viewModel.completedTasks.push(task);
-        assert(viewModel.incompleteTasks().length === 0);
-        assert(viewModel.completedTasks().length === 1);
+        viewModel.task.incompleteTasks.remove(task);
+        viewModel.task.completedTasks.push(task);
+        assert(viewModel.task.incompleteTasks().length === 0);
+        assert(viewModel.task.completedTasks().length === 1);
 
-        viewModel.incompleteTasks.removeAll();
-        viewModel.completedTasks.removeAll();
-        assert(viewModel.incompleteTasks().length === 0);
-        assert(viewModel.completedTasks().length === 0);
+        viewModel.task.incompleteTasks.removeAll();
+        viewModel.task.completedTasks.removeAll();
+        assert(viewModel.task.incompleteTasks().length === 0);
+        assert(viewModel.task.completedTasks().length === 0);
     });
 
     it('test task completed', function(){
