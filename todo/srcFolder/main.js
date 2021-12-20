@@ -60,7 +60,25 @@ const BACKGROUND_COLOR_ALPHA = [
 
 //ビューモデルクラス
 class ViewModel {
-    // コラム・プロジェクト(画面左側)
+    // コラム・プロジェクト
+    column = new ViewModelColumn();
+
+    //タスク
+    task = new ViewModelTask();
+
+    //環境
+    env = new ViewModelEnvironment();
+
+    //ユーザー設定
+    userSetting = new ViewModelUserSetting(); 
+}
+
+//コラム・プロジェクト
+class ViewModelColumn {
+    //コラム・プロジェクト表示・非表示
+    display = ko.observable(true);
+
+    //コラム
     columns = [
         new Column("今日", "#66cdaa", "wb_sunny", DATE_RANGE.TODAY, DATE_RANGE.TODAY, null),
         new Column("明日", "#ffa500", "wb_twilight", DATE_RANGE.TOMORROW, DATE_RANGE.TOMORROW, null),
@@ -68,45 +86,58 @@ class ViewModel {
         new Column("完了済み", "#777", "check_circle_outline", null, null, TASK_STATUS.COMPLETED),
         new Column("期限超過", "#ff5416cc", "new_releases", null, DATE_RANGE.YESTERDAY, null)
     ];
+
+    //プロジェクト
     projects = ko.observableArray();
 
-    // タスク(画面右側)
-    incompleteTasks = ko.observableArray();
-    completedTasks = ko.observableArray();
-
-    //コラム・プロジェクト一覧表示中であるか？
-    displayColumn = ko.observable(true);
-
-    //モバイル端末画面であるか？
-    isMobile = ko.observable(false);
-
-    //完了済みタスクの表示フラグ(0:非表示)
-    openCompleteTaskFlag = ko.observable(0);
-
-    //選択中のコラム・プロジェクト
+    //選択されているコラム・プロジェクト
     selectedColumn = ko.observable(null);
 
     //名称変更中のプロジェクト
     renameProject = ko.observable(null);
+}
 
-    //設定ウィンドウ表示中であるか？
-    displaySettings = ko.observable(false);
+//タスク
+class ViewModelTask {
+    //未完了タスク
+    incompleteTasks = ko.observableArray();
 
-    /*** 設定 ***/
+    //完了済タスク
+    completedTasks = ko.observableArray();
+
+    //完了済みタスクの表示フラグ(0:非表示)
+    openCompleteTaskFlag = ko.observable(0);
+}
+
+//環境
+class ViewModelEnvironment {
+    //モバイル端末画面であるか？
+    isMobile = ko.observable(false);
+}
+
+//ユーザー設定
+class ViewModelUserSetting {
+    //設定ウィンドウを表示・非表示
+    display = ko.observable(false);
+
     //設定アイコン表示・非表示
-    displaySettingsIcon = ko.observable(false);
- 
-    //背景画像
+    displayIcon = ko.observable(false);
+
+    //背景画像最大サイズ
     imageFileMaxSize = ko.observable('0');
+
+    //背景画像ハッシュ(SHA256)
     backgroundImageHash = ko.observable(null);
 
-    //フォント
+    //選択可能なフォントファミリー
     availableFontFamilies = [
         new FontFamily("デフォルト", "unset"),
         new FontFamily("Zen Antique", "'Zen Antique'"),
         new FontFamily("Rampart One", "'Rampart One'"),
         new FontFamily("Hachi Maru Pop", "'Hachi Maru Pop'")
     ];
+
+    //選択されたフォントファミリー
     selectedFontFamily = ko.observable(DEFAULT_FONT_FAMILY);
 }
 
@@ -231,10 +262,10 @@ class Task{
 class HeadViewModel {
     //フォントファミリー(Google Fonts読み込み用)
     fontFamilyHref = ko.computed(function(){
-        if(vm.selectedFontFamily() === "unset") {
+        if(vm.userSetting.selectedFontFamily() === "unset") {
             return "";
         }
-        const param = vm.selectedFontFamily().replaceAll("\'", "").replaceAll(" ", "+");
+        const param = vm.userSetting.selectedFontFamily().replaceAll("\'", "").replaceAll(" ", "+");
         return `https://fonts.googleapis.com/css2?family=${param}&display=swap`;
     });
 }
@@ -251,8 +282,8 @@ class FontFamily {
 
 //ビューにビューモデルをバインド
 const vm = new ViewModel();
-vm.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
-vm.backgroundImageHash.subscribe(function(newValue){
+vm.env.isMobile(navigator.userAgent.match(/iPhone|Android.+Mobile/));
+vm.userSetting.backgroundImageHash.subscribe(function(newValue){
     for(const item of BACKGROUND_COLOR_ALPHA){
         //背景色透過率
         const alpha = (newValue !== null) ? item.alpha : 1.0;
@@ -421,17 +452,17 @@ function displayTasks(column){
         }
     ).done(function(tasksDataArray){
         //返ってきたタスク処理する
-        vm.selectedColumn(column);
-        vm.incompleteTasks.removeAll();
-        vm.completedTasks.removeAll();
+        vm.column.selectedColumn(column);
+        vm.task.incompleteTasks.removeAll();
+        vm.task.completedTasks.removeAll();
         for(const row of tasksDataArray){
             const task = readTaskFromRow(row);
             if(task.isCompleted){
                 //完了済みタスク
-                vm.completedTasks.push(task);
+                vm.task.completedTasks.push(task);
             }else{
                 //未完了タスク
-                vm.incompleteTasks.push(task);
+                vm.task.incompleteTasks.push(task);
             }
         }
     }).fail(function(XMLHttpRequest, status, e){
@@ -461,8 +492,8 @@ function clickTaskDelete(task){
             alert("タスクはすでに削除されています");
         }
         //タスクを除去する
-        vm.incompleteTasks.remove(task);
-        vm.completedTasks.remove(task);
+        vm.task.incompleteTasks.remove(task);
+        vm.task.completedTasks.remove(task);
         //未完了タスク数が変更される可能性があるため、更新する
         displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
@@ -472,7 +503,7 @@ function clickTaskDelete(task){
 
 //タスク完了状態チェックボタン有効化
 function clickTaskStatus(task){
-    const project_id = (vm.selectedColumn() instanceof Project) ? vm.selectedColumn().id : null;
+    const project_id = (vm.column.selectedColumn() instanceof Project) ? vm.column.selectedColumn().id : null;
     //タスクを完了状態にしたときのみ効果音を鳴らす
     if(!task.isCompleted && soundNum !== 0){
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -492,7 +523,7 @@ function clickTaskStatus(task){
             dataType: "json"
         }
     ).done(function(tasksDataArray){
-        displayTasks(vm.selectedColumn());
+        displayTasks(vm.column.selectedColumn());
         //未完了タスク数が変更される可能性があるため、更新する
         displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
@@ -507,7 +538,7 @@ function displayProjects(projectsDataArray){
         const project_name = projectsDataArray[i]["project_name"];
         let color = projectsDataArray[i]["color"];
         if(color === null) color = DEFAULT_PROJECT_COLOR;
-        vm.projects.push(new Project(project_id, project_name, color));
+        vm.column.projects.push(new Project(project_id, project_name, color));
     }
 }
 
@@ -526,7 +557,7 @@ function initProjects(){
         //返ってきたプロジェクト処理する
         displayProjects(projectsDataArray);
         //今日のタスク表示
-        displayTasks(vm.columns[COLUMN_TYPE.TODAY]);
+        displayTasks(vm.column.columns[COLUMN_TYPE.TODAY]);
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクトを表示できません\n" + e);
     });
@@ -553,7 +584,7 @@ function inputProject(text){
         $("#input_project").val("");
         //プロジェクトの末尾に追加し、選択状態にする
         const project = new Project(project_id, project_name, DEFAULT_PROJECT_COLOR);
-        vm.projects.push(project);
+        vm.column.projects.push(project);
         displayTasks(project);
         
     }).fail(function(XMLHttpRequest, status, e){
@@ -563,7 +594,10 @@ function inputProject(text){
 
 //プロジェクトの色変更
 function changeProjectColor(object, event){
-    const project = object instanceof Project ? object : vm.selectedColumn();
+    if(!(object instanceof Project)){
+        return;
+    }
+    const project = object;
     const color = event.target.value;
     $.ajax("./post.php",
         {
@@ -601,12 +635,12 @@ function deleteProject(project){
             }
         ).done(function(data){
             //削除したプロジェクトを画面表示から消す
-            vm.projects.remove(project);
+            vm.column.projects.remove(project);
             //削除プロジェクトが選択中だった場合、タスク画面表示を変更する
-            vm.incompleteTasks.remove(function(item){ return item.project === project } );
-            vm.completedTasks.remove(function(item){ return item.project === project } );
-            if(vm.selectedColumn() === project){
-                vm.selectedColumn(null);
+            vm.task.incompleteTasks.remove(function(item){ return item.project === project } );
+            vm.task.completedTasks.remove(function(item){ return item.project === project } );
+            if(vm.column.selectedColumn() === project){
+                vm.column.selectedColumn(null);
             }
             //未完了タスク数が変更される可能性があるため、更新する
             displayIncompleteTasks();
@@ -642,10 +676,10 @@ function displayIncompleteTasks(){
             dataType: "json"
         }
     ).done(function(incompleteTasksCount){
-        vm.columns[COLUMN_TYPE.TODAY].countIncompleteTasks(incompleteTasksCount[0]["count"]);
-        vm.columns[COLUMN_TYPE.TOMORROW].countIncompleteTasks(incompleteTasksCount[1]["count"]);
-        vm.columns[COLUMN_TYPE.LATER].countIncompleteTasks(incompleteTasksCount[2]["count"]);
-        vm.columns[COLUMN_TYPE.INCOMPLETE].countIncompleteTasks(incompleteTasksCount[3]["count"]);
+        vm.column.columns[COLUMN_TYPE.TODAY].countIncompleteTasks(incompleteTasksCount[0]["count"]);
+        vm.column.columns[COLUMN_TYPE.TOMORROW].countIncompleteTasks(incompleteTasksCount[1]["count"]);
+        vm.column.columns[COLUMN_TYPE.LATER].countIncompleteTasks(incompleteTasksCount[2]["count"]);
+        vm.column.columns[COLUMN_TYPE.INCOMPLETE].countIncompleteTasks(incompleteTasksCount[3]["count"]);
     }).fail(function(e){
         alert("未完了タスク数を表示できません\n" + e);
     });
@@ -654,11 +688,12 @@ function displayIncompleteTasks(){
 //タスク入力欄選択中にEnter
 function inputTask(text){
     //プロジェクト選択中でない場合はreturn
-    const column = vm.selectedColumn();
+    const column = vm.column.selectedColumn();
     if(!(column instanceof Project)){
         alert("タスクの追加対象プロジェクトが選択されていません");
         return;
     }
+    const project = column;
 
     //日付未入力の場合、表示をして終了
     if($("#input_date").val() == false){
@@ -672,7 +707,7 @@ function inputTask(text){
         {
             type: "POST",
             data:{
-                project_id: column.id,
+                project_id: project.id,
                 task_value: text,
                 completetion_date: completetion_date,
                 todo: "insertTaskToProject"
@@ -682,7 +717,7 @@ function inputTask(text){
     ).done(function(tasksDataArray){
         //入力したタスク名を空白にする
         $("#input_task").val("");
-        displayTasks(vm.selectedColumn());
+        displayTasks(vm.column.selectedColumn());
         //未完了タスク数が変更されるため、更新する
         displayIncompleteTasks();
     }).fail(function(XMLHttpRequest, status, e){
@@ -710,20 +745,20 @@ function initTaskDate(){
 
 //完了済みタスクの表示非表示 
 function openComplete(){
-    vm.openCompleteTaskFlag(1 - vm.openCompleteTaskFlag());
+    vm.task.openCompleteTaskFlag(1 - vm.task.openCompleteTaskFlag());
 }
 
 //プロジェクト名クリック
 function clickProjectName(project, event){
-    if(vm.selectedColumn() !== project) return true;
+    if(vm.column.selectedColumn() !== project) return true;
     $(event.target).parent().find(".rename").val(project.name());
-    vm.renameProject(project);
+    vm.column.renameProject(project);
     return true;
 }
 
 //プロジェクト名変更 Enterキー押下時の処理
 function keydownRenameProject(project, event){
-    if(vm.renameProject() === null) return true;
+    if(vm.column.renameProject() === null) return true;
     if(event.key !== "Enter") return true;
     const project_name = event.target.value;
     if(project_name.length <= 0) {
@@ -746,7 +781,7 @@ function keydownRenameProject(project, event){
             return;
         }
         project.name(project_name);
-        vm.renameProject(null);
+        vm.column.renameProject(null);
     }).fail(function(XMLHttpRequest, status, e){
         alert("プロジェクトを変更できませんでした" + e);
     });
@@ -755,7 +790,7 @@ function keydownRenameProject(project, event){
 
 //プロジェクト名変更 フォーカスが外れた時の処理
 function blurProjectName(project, event){
-    vm.renameProject(null);
+    vm.column.renameProject(null);
     return true;
 }
 
@@ -770,7 +805,7 @@ function readTaskFromRow(row){
 
     // プロジェクトIDより対応するプロジェクトオブジェクトを探す
     let project = null;
-    vm.projects().forEach(function(v, i){
+    vm.column.projects().forEach(function(v, i){
         if(v.id != project_id) return;
         project = v;
     });
@@ -869,7 +904,7 @@ function updateBackgroundImage(imageData){
             alert("背景画像を変更できません");
             return;
         }
-        vm.backgroundImageHash(data["hash"]);
+        vm.userSetting.backgroundImageHash(data["hash"]);
     }).fail(function(XMLHttpRequest, status, e){
         alert("背景画像を変更できません\n" + e);
     });
@@ -909,17 +944,17 @@ function initSkin(){
             const value = row["value"];
             switch(key){
                 case "font-family":
-                    vm.selectedFontFamily(value);
+                    vm.userSetting.selectedFontFamily(value);
                     break;
                 case "image-file-max-size":
-                    vm.imageFileMaxSize(value);
+                    vm.userSetting.imageFileMaxSize(value);
                     break;
                 case "background-image-hash":
-                    vm.backgroundImageHash(value);
+                    vm.userSetting.backgroundImageHash(value);
                     break;
             }
         }
-        vm.displaySettingsIcon(true);
+        vm.userSetting.displayIcon(true);
     }).fail(function(XMLHttpRequest, status, e){
         console.log("スキン初期設定できません\n" + e);
     });

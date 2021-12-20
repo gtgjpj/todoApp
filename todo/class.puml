@@ -1,20 +1,32 @@
 @startuml
 class ViewModel {
-  .. Column / Project ..
-  {field} +displayColumn : ko.observable(Boolean)
+  {field} +column : ViewModelColumn
+  {field} +task : ViewModelTask
+  {field} +env : ViewModelEnvironment
+  {field} +userSetting : ViewModelUserSetting
+}
+
+class ViewModelColumn {
+  {field} +display : ko.observable(Boolean)
   +columns : Column[]
   {field} +projects : ko.observableArray(Project)
   {field} +selectedColumn : ko.observable(AbstractColumn)
   {field} +renameProject : ko.observable(Project)
-  .. Task ..
+}
+
+class ViewModelTask {
   {field} +incompleteTasks : ko.observableArray(Task)
   {field} +completedTasks : ko.observableArray(Task)
   {field} +openCompleteTaskFlag : ko.observable(Number)
-  .. Environment ..
+}
+
+class ViewModelEnvironment {
   {field} +isMobile : ko.observable(Boolean)
-  .. User Setting ..
-  {field} +displaySettings : ko.observable(Boolean)
-  {field} +displaySettingsIcon : ko.observable(Boolean)
+}
+
+class ViewModelUserSetting {
+  {field} +display : ko.observable(Boolean)
+  {field} +displayIcon : ko.observable(Boolean)
   {field} +imageFileMaxSize : ko.observable(String)
   {field} +backgroundImageHash : ko.observable(String)
   +availableFontFamilies : FontFamily[]
@@ -37,9 +49,9 @@ class Project {
 }
 
 class Column {
-  -completetionDateRangeStart : Number
-  -completetionDateRangeEnd : Number
-  -taskStatus : Number
+  -#completetionDateRangeStart : Number
+  -#completetionDateRangeEnd : Number
+  -#taskStatus : Number
   {field} +countIncompleteTasks : ko.observable(Number)
   +daysLaterToDateStr(daysLater) : String
   +get completetionDateRangeStart() : String
@@ -66,10 +78,14 @@ class FontFamily {
   +fontFamily : String
 }
 
-AbstractColumn <|-- Column
-AbstractColumn <|-- Project
-ViewModel o-- Column
-ViewModel o-- Project
-ViewModel o-- Task
-ViewModel o-- FontFamily
+AbstractColumn <|-u- Column
+AbstractColumn <|-u- Project
+ViewModel "1" -- "1" ViewModelColumn
+ViewModel "1" -- "1" ViewModelTask
+ViewModel "1" -- "1" ViewModelEnvironment
+ViewModel "1" -- "1" ViewModelUserSetting
+ViewModelColumn "1" *-- "5" Column
+ViewModelColumn "1" o-- "0..*" Project
+ViewModelTask "1" o-- "0..*" Task
+ViewModelUserSetting "1" *-- "4" FontFamily
 @enduml
