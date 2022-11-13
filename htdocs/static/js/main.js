@@ -314,10 +314,10 @@ const options = {
     autoMatchOsTheme: true // default: true
 }
 //豪華な音
-const luxurySoundSrc = "./sound/great.mp3";
+const luxurySoundSrc = "./static/media/great.mp3";
 const luxurySoundIcon = "campaign";
 //シンプルな音
-const simpleSoundSrc = "./sound/simple.mp3";
+const simpleSoundSrc = "./static/media/simple.mp3";
 const simpleSoundIcon = "notifications";
 //無音
 const notSoundSrc = "";
