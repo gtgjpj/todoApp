@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" href="../base.css">
-    <link rel="stylesheet" href="./main.css">
+    <link rel="stylesheet" href="./static/css/base.css">
+    <link rel="stylesheet" href="./static/css/main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" data-bind="attr: { href: fontFamilyHref }">
     <title>To-Do</title>
@@ -24,7 +24,7 @@
                 click: env.isMobile() ? function(){column.display(!column.display());return true;} : function(){return true},
                 css: env.isMobile() ? 'hamburger' : 'icon-person',
                 text: env.isMobile() ? 'menu' : 'person'"></i>
-            <p class="user">みんまるたすく ver1.7.0</p>
+            <p class="user">みんまるたすく ver1.7.1</p>
             <i class="icon-settings material-icons" data-bind="
                 click: function(){userSetting.display(!userSetting.display())},
                 visible: userSetting.displayIcon">settings</i>
@@ -190,9 +190,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../jquery-3.5.1.min.js"></script>
-    <script src="../knockout-3.5.1.js"></script>
-    <script src="./main.js"></script>
+    <script src="./static/js/jquery-3.5.1.min.js"></script>
+    <script src="./static/js/knockout-3.5.1.js"></script>
+    <script src="./static/js/main.js"></script>
 </body>
 
 </html>
