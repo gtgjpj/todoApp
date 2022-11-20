@@ -70,3 +70,18 @@ http://localhost/index.php 等でにブラウザでアクセスすることに�
 
 ※XAMPP を使用せず、LAMP 環境を用意する際の説明は省略させていただきます。
 （私は[こちらのチュートリアル](https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-ubuntu-20-04-ja)を用いてサーバーを用意して動作させています）
+
+### docker compose を使用する場合
+最初に docker コンテナを作成していない場合は、以下のコマンドを実行して下さい。
+````
+~/workspace/todoApp $ docker compose build
+~/workspace/todoApp $ docker compose up -d
+````
+これで、バックグランドで docker コンテナが起動します。
+````
+~/workspace/todoApp $ docker compose down
+````
+のようなコマンドを実行しなければ、起動し続けます。PCを再起動しても自動的に docker コンテナが起動します。
+
+* http://localhost:8080/  # htdocs ディレクトリ内のPHP実行結果が表示されます
+* http://localhost:8081/  # phpMyAdmin が表示されます。ユーザー名 root パスワード password でログインできます。

@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  mariadb:
+    image: mariadb:10.9.4
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: 'password'
+
+  phpmyadmin:
+    depends_on:
+      - mariadb
+    image: phpmyadmin:5.2.0
+    environment:
+      PMA_HOST: mariadb
+      UPLOAD_LIMIT: 16M
+    restart: always
+    ports:
+      - "127.0.0.1:8081:80"
+
+  php-apache:
+    build: ./php
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - ./htdocs:/var/www/html
+    restart: always
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - mariadb
+    environment:
+      - APACHE_RUN_USER=#${UID:-33}
+      - APACHE_RUN_GROUP=#${GID:-33}
+
+volumes:
+    db_data: {}
